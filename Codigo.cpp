@@ -13,7 +13,7 @@ class Diccionario_Dinamico{
     uchar** guardador;
     int capacidad_maxima;
     int cantidad_actual;
-    int Indice_Letras[256];
+    int Indice_Letras[28];
 // Aqui se rellena el arreglo inicial
     public:
     Diccionario_Dinamico(){
@@ -21,7 +21,7 @@ class Diccionario_Dinamico{
         cantidad_actual=0;
         guardador= new uchar*[capacidad_maxima];
 
-        for (int i=0;i<256;i++){
+        for (int i=0;i<28;i++){
             Indice_Letras[i]=-1;
         }
     }
@@ -35,7 +35,7 @@ class Diccionario_Dinamico{
 
         int tope= cantidad_actual-1;
 
-        for (int i= Inicial+1;i<256;i++){
+        for (int i= Inicial+1;i<28;i++){
             if (Indice_Letras[i]!=-1){
                 tope= Indice_Letras[i]-1;
                 break;
