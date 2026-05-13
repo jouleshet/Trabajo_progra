@@ -92,6 +92,23 @@ void cargarDiccionario(const string& nombreArchivo, vector<unsigned char*>& Vect
       return;
      }
    char temp[100]; // temp para guardar la palabra, max 100 caracteres
+       while(archivo.getline(temp, 256)){
 
-   
+        // reservar memoria para la palabra (temp+1 por el caracter null)
+        unsigned char* palabra =
+            new unsigned char[strlen(temp) + 1];
+
+        // copiar palabra
+        strcpy((char*)palabra, temp);
+
+        // meter la palabra al vector
+        añadir_vector(
+            vectorPalabras,
+            palabra,
+            indice
+        );
+    }
+
+    archivo.close();
+
 }
