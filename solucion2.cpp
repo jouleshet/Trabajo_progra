@@ -5,6 +5,7 @@ using namespace std;
 #include <vector>
 #include <fstream>
 #include <cstring>
+#include "compara_ascii.cpp"
 
 struct Nodo {
     unsigned char* clave; 
