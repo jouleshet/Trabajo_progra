@@ -46,21 +46,32 @@ void enlaza_listas(Nodo* nodoA,Nodo* nodoB){
 
 }
 
-void Enlace_Sub_Lista(Nodo* nodo,Nodo* subnodo){
+Nodo* Enlace_Sub_Lista(Nodo* nodo,Nodo* subnodo){
     if (nodo) nodo->inf=subnodo;
 
 }
 
-Nodo* guarda_clave(const unsigned char* palabra, Nodo* ultimo){
+Nodo* insertarOrdenado(Nodo* cabeza, const unsigned char* palabra) {
     Nodo* nuevo = new Nodo(palabra);
 
-    if (ultimo!= nullptr){
-        enlaza_listas(ultimo,nuevo);
+    if (cabeza == nullptr || compararLexicografico(palabra,cabeza->clave) < 0) {
+        nuevo->sig = cabeza;
+        if (cabeza != nullptr) cabeza->ant = nuevo;
+        return nuevo; // El nuevo es la nueva cabeza
     }
 
-    return nuevo;
+    // Caso B: Buscar el lugar en medio o al final
+    Nodo* actual = cabeza;
+    while (actual->sig != nullptr && compararLexicografico(palabra,actual->sig->clave) > 0) {
+        actual = actual->sig;
+    }
 
-
+    // Insertar después de 'actual'
+    nuevo->sig = actual->sig;
+    nuevo->ant = actual;
+    if (actual->sig != nullptr) (actual->sig)->ant = nuevo;
+    actual->sig = nuevo;
+    return cabeza;
 }
 
 Nodo* Crea_Clave(string texto){
@@ -68,19 +79,14 @@ Nodo* Crea_Clave(string texto){
     string lineas;
 
     Nodo* cabeza = nullptr; 
-    Nodo* ultimo = nullptr;
 
     while(getline(archivo,lineas)){
         if (lineas.empty()) continue;
 
         const unsigned char* palabra = (const unsigned char*)lineas.c_str();
 
-        Nodo* nuevo = guarda_clave(palabra,ultimo);
-
-        if (cabeza==nullptr){
-            cabeza=nuevo;
-        }
-        ultimo=nuevo;
+        cabeza=insertarOrdenado(cabeza,palabra);
+        
     }
     archivo.close();
     return cabeza;
