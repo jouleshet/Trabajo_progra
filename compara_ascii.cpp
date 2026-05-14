@@ -11,7 +11,7 @@ using namespace std;
 // > 0 si s1 va después que s2
 // 0 si son iguales
 
-int compararLexicografico(unsigned char* Palabra1, unsigned char* Palabra2) {
+int compararLexicografico(const unsigned char* Palabra1, const unsigned char* Palabra2) {
     int i = 0;
     //Este while, compara las palabras hasta que lleguen al simbolo
     // del espacio(/0), que significa que termina alguna de las 2 palabras
