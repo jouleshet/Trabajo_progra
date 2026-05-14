@@ -46,7 +46,7 @@ void enlaza_listas(Nodo* nodoA,Nodo* nodoB){
 
 }
 
-Nodo* Enlace_Sub_Lista(Nodo* nodo,Nodo* subnodo){
+void Enlace_Sub_Lista(Nodo* nodo,Nodo* subnodo){
     if (nodo) nodo->inf=subnodo;
 
 }
