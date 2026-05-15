@@ -1,11 +1,15 @@
 #include <string>
 #include <iostream>
-using namespace std;
 #include <cstdlib>
 #include <vector>
 #include <fstream>
 #include <cstring>
+#include <chrono>
 #include "compara_ascii.cpp"
+#include <algorithm>
+#include <random>
+
+using namespace std;
 
 struct Nodo {
     unsigned char* clave; 
@@ -19,54 +23,81 @@ struct Nodo {
         strcpy((char*)clave, (const char*)palabra);
         sig = ant = inf = nullptr;
     }
- };
+};
 
-///////////////////////////////////////7
+//Funciones de Enlace
+void enlaza_listas(Nodo* nodoA, Nodo* nodoB) {
+    if (nodoA) nodoA->sig = nodoB;
+    if (nodoB) nodoB->ant = nodoA;
+}
 
- void imprimir_lista(Nodo* cabeza) {
-    Nodo* actual = cabeza;
-    int contador = 1;
+// Logica de la Grilla Multinivel (Solucion 2)
+
+// Crea los niveles superiores (L2, L3... LL) cada k nodos 
+Nodo* crearNiveles(Nodo* cabezaL1, int k) {
+    if (!cabezaL1) return nullptr;
+
+    Nodo* nivelActualCabeza = cabezaL1;
     
-    cout << "--- Contenido de la Lista Base (L1) ---" << endl;
-    while (actual != nullptr) {
-        // Casteamos a char* para que cout sepa que es una palabra
-        cout << "Nodo " << contador << ": " << (char*)actual->clave << endl;
+    while (true) {
+        int contadorNivel = 0;
+        Nodo* temp = nivelActualCabeza;
+        while(temp) { contadorNivel++; temp = temp->sig; }
         
-        // El paso clave: saltar al siguiente nodo
-        actual = actual->sig;
-        contador++;
+        if (contadorNivel <= k) break; // Nivel más alto alcanzado 
+
+        Nodo* nuevaCabezaSuperior = nullptr;
+        Nodo* ultimoSuperior = nullptr;
+        Nodo* actualInferior = nivelActualCabeza;
+        int i = 0;
+
+        while (actualInferior) {
+            if (i % k == 0) {
+                Nodo* nuevoNodoSuperior = new Nodo(actualInferior->clave);
+                nuevoNodoSuperior->inf = actualInferior; 
+                
+                if (!nuevaCabezaSuperior) {
+                    nuevaCabezaSuperior = nuevoNodoSuperior;
+                } else {
+                    enlaza_listas(ultimoSuperior, nuevoNodoSuperior);
+                }
+                ultimoSuperior = nuevoNodoSuperior;
+            }
+            actualInferior = actualInferior->sig;
+            i++;
+        }
+        nivelActualCabeza = nuevaCabezaSuperior;
     }
-    cout << "---------------------------------------" << endl;
-}
-//////////////////////////////////////////////////////////////////7
-
-void enlaza_listas(Nodo* nodoA,Nodo* nodoB){
-    if (nodoA) nodoA->sig= nodoB;
-    if (nodoB) nodoB->ant= nodoA;
-
+    return nivelActualCabeza; 
 }
 
-void Enlace_Sub_Lista(Nodo* nodo,Nodo* subnodo){
-    if (nodo) nodo->inf=subnodo;
-
+// Algoritmo de busqueda eficiente usando los niveles 
+bool buscarEnGrilla(Nodo* cabezaLL, const unsigned char* palabraBuscada) {
+    Nodo* actual = cabezaLL;
+    while (actual) {
+        while (actual->sig && compararLexicografico(actual->sig->clave, palabraBuscada) <= 0) {
+            actual = actual->sig;
+        }
+        if (compararLexicografico(actual->clave, palabraBuscada) == 0) return true;
+        if (actual->inf) actual = actual->inf; // Baja de nivel 
+        else break;
+    }
+    return false;
 }
+
+// Funciones de Carga Originales
 
 Nodo* insertarOrdenado(Nodo* cabeza, const unsigned char* palabra) {
     Nodo* nuevo = new Nodo(palabra);
-
-    if (cabeza == nullptr || compararLexicografico(palabra,cabeza->clave) < 0) {
+    if (cabeza == nullptr || compararLexicografico(palabra, cabeza->clave) < 0) {
         nuevo->sig = cabeza;
         if (cabeza != nullptr) cabeza->ant = nuevo;
-        return nuevo; // El nuevo es la nueva cabeza
+        return nuevo;
     }
-
-    // Caso B: Buscar el lugar en medio o al final
     Nodo* actual = cabeza;
-    while (actual->sig != nullptr && compararLexicografico(palabra,actual->sig->clave) > 0) {
+    while (actual->sig != nullptr && compararLexicografico(palabra, actual->sig->clave) > 0) {
         actual = actual->sig;
     }
-
-    // Insertar después de 'actual'
     nuevo->sig = actual->sig;
     nuevo->ant = actual;
     if (actual->sig != nullptr) (actual->sig)->ant = nuevo;
@@ -74,40 +105,146 @@ Nodo* insertarOrdenado(Nodo* cabeza, const unsigned char* palabra) {
     return cabeza;
 }
 
-Nodo* Crea_Clave(string texto){
+Nodo* Crea_Clave(string texto) {
     ifstream archivo(texto);
     string lineas;
-
     Nodo* cabeza = nullptr; 
-
-    while(getline(archivo,lineas)){
+    while(getline(archivo, lineas)){
         if (lineas.empty()) continue;
-
-        const unsigned char* palabra = (const unsigned char*)lineas.c_str();
-
-        cabeza=insertarOrdenado(cabeza,palabra);
-        
+        cabeza = insertarOrdenado(cabeza, (const unsigned char*)lineas.c_str());
     }
     archivo.close();
     return cabeza;
-
 }
 
+// Main con medición de tiempo para el informe
 
-int main(int argc, char* argv[]){
-    string nombre_archivo = argv[1];
-
-    Nodo* prueba_1=Crea_Clave(nombre_archivo);
-
-    if (prueba_1 != nullptr) {
-        imprimir_lista(prueba_1);
-    } else {
-        cout << "La lista esta vacia o el archivo no existe." << endl;
+int main(int argc, char* argv[]) {
+    if (argc < 3) {
+        cout << "Uso: ./solucion2 <archivo_D1> <valor_k>" << endl;
+        return 1;
     }
 
+    string archivoD1 = argv[1];
+    int k = stoi(argv[2]);
+
+    // EXPERIMENTO 1: Construccion
+    cout << "Cargando Diccionario D1 y construyendo niveles..." << endl;
+    auto inicio = chrono::high_resolution_clock::now();
+
+    Nodo* L1 = Crea_Clave(archivoD1);
+    Nodo* grilla = crearNiveles(L1, k);
+
+    auto fin = chrono::high_resolution_clock::now();
+    chrono::duration<double> tiempo = fin - inicio;
+
+    cout << "Estructura creada en: " << tiempo.count() << " segundos." << endl;
+    cout << "Valor de k utilizado: " << k << endl;
+
+    // EXPERIMENTO 2: Busqueda de 10.000 palabras
+    cout << "\nIniciando Experimento 2: Busquedas..." << endl;
+    
+    string archivoD2 = "D2.txt"; 
+    ifstream fileD2(archivoD2);
+    vector<string> palabrasD2;
+    string linea;
+
+    // Cargar D2.txt en un vector
+    while(getline(fileD2, linea)) {
+        if(!linea.empty()) palabrasD2.push_back(linea);
+    }
+    fileD2.close();
+
+    // Tomar 10.000 palabras aleatorias (mezclamos y cortamos)
+    random_device rd;
+    mt19937 g(rd());
+    shuffle(palabrasD2.begin(), palabrasD2.end(), g);
+    
+    int num_busquedas = min(10000, (int)palabrasD2.size());
+    int encontradas = 0;
+
+    auto inicioBusqueda = chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < num_busquedas; i++) {
+        const unsigned char* palabraTest = (const unsigned char*)palabrasD2[i].c_str();
+        if (buscarEnGrilla(grilla, palabraTest)) {
+            encontradas++;
+        }
+    }
+
+    auto finBusqueda = chrono::high_resolution_clock::now();
+    chrono::duration<double> tiempoBusqueda = finBusqueda - inicioBusqueda;
+    double tiempoPromedio = tiempoBusqueda.count() / num_busquedas;
+
+    cout << "Total busquedas: " << num_busquedas << endl;
+    cout << "Palabras encontradas: " << encontradas << endl;
+    cout << "Tiempo total de busqueda: " << tiempoBusqueda.count() << " segundos." << endl;
+    cout << "Tiempo promedio por palabra: " << tiempoPromedio << " segundos." << endl;
+
+    // EXPERIMENTO 3: Insercion de 5.000 claves
+    cout << "\nIniciando Experimento 3: Inserciones..." << endl;
+    
+    // Tomar las primeras 5000 palabras de D2
+    int limiteIns = min(5000, (int)palabrasD2.size());
+    vector<string> palabrasInsertar(palabrasD2.begin(), palabrasD2.begin() + limiteIns);
+    
+    // Desordenar aleatoriamente
+    shuffle(palabrasInsertar.begin(), palabrasInsertar.end(), g);
+
+    auto inicioIns = chrono::high_resolution_clock::now();
+    int insExitosas = 0;
+
+    for(const string& p : palabrasInsertar) {
+        L1 = insertarOrdenado(L1, (const unsigned char*)p.c_str());
+        insExitosas++;
+    }
+
+    auto finIns = chrono::high_resolution_clock::now();
+    chrono::duration<double> tiempoIns = finIns - inicioIns;
+
+    cout << "Inserciones realizadas: " << insExitosas << endl;
+    cout << "Tiempo total de insercion: " << tiempoIns.count() << " segundos." << endl;
+
+    // EXPERIMENTO 4: Eliminacion de 5.000 claves
+    cout << "\nIniciando Experimento 4: Eliminaciones..." << endl;
+    
+    vector<string> palabrasEliminar;
+    if (palabrasD2.size() > 5000) {
+        // Tomar las ultimas 5000
+        palabrasEliminar.assign(palabrasD2.end() - 5000, palabrasD2.end());
+    } else {
+        palabrasEliminar = palabrasD2;
+    }
+    
+    // Desordenar aleatoriamente
+    shuffle(palabrasEliminar.begin(), palabrasEliminar.end(), g);
+
+    auto inicioDel = chrono::high_resolution_clock::now();
+    int elimExitosas = 0;
+
+    for(const string& p : palabrasEliminar) {
+        Nodo* actual = L1;
+        while(actual) {
+            // Buscamos el nodo exacto a eliminar
+            if (compararLexicografico(actual->clave, (const unsigned char*)p.c_str()) == 0) {
+                // Reconectar punteros de la lista base
+                if(actual->ant) actual->ant->sig = actual->sig;
+                else L1 = actual->sig; // Si era la cabeza
+                
+                if(actual->sig) actual->sig->ant = actual->ant;
+                
+                elimExitosas++;
+                break; // Pasamos a la siguiente palabra
+            }
+            actual = actual->sig;
+        }
+    }
+
+    auto finDel = chrono::high_resolution_clock::now();
+    chrono::duration<double> tiempoDel = finDel - inicioDel;
+
+    cout << "Eliminaciones exitosas: " << elimExitosas << endl;
+    cout << "Tiempo total de eliminacion: " << tiempoDel.count() << " segundos." << endl;
     return 0;
 
-
-
 }
-
