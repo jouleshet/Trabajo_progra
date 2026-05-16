@@ -1,11 +1,3 @@
-/*QUE HACER
-   CREAR ESTRUCTURA QUE GUARDA PALABRAS QUE FUNCIONE SIMILAR A UN ARREGLO , EL CUAL TIENE QUE ESTAR SIEMPRE ORDENADO
-   EL ARREGLO TIENE CAPACIDAD MAXIMA, SI SE LLENA CREAR OTRO, QUE TENGA MAYOR CAPACIDAD, PERO QUE EL AUMENTO SEA
-   DECENTE, OSEA, NO AUMENTARLO EN 1 PQ SINO CADA PALABRA HARIA OTRO MAS esto es el OVERHEAD
-
-   usar un INDICE que guarde las posiciones de las letras, asi al buscar un elemento solo uso el valor del indice de la 1ra letra y la 
-*/
-
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -149,82 +141,83 @@ void eliminarPalabra(ArregloPalabras& arreglo, unsigned char* palabra, int* indi
     }
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    // 1. Validar si el usuario pasó el argumento por consola
+    if (argc < 2) {
+        cout << "Error: Debes especificar la cantidad de palabras al azar." << endl;
+        cout << "Uso correcto: " << argv[0] << " <cantidad_de_palabras>" << endl;
+        cout << "Ejemplo: " << argv[0] << " 100" << endl;
+        return 1;
+    }
+
+    // 2. Convertir el argumento de texto a un número entero
+    int cantidadAInsertar = atoi(argv[1]);
+
+    if (cantidadAInsertar <= 0) {
+        cout << "Error: La cantidad de palabras debe ser un numero entero mayor que 0." << endl;
+        return 1;
+    }
+
+    // Inicializar el índice de letras en -1
     for (int i = 0; i < 26; i++) indice[i] = -1;
+    
+    // Crear la estructura de palabras
     ArregloPalabras miArreglo;
     crearArreglo(miArreglo, CAPACIDAD_INICIAL);
 
-    // --- EXPERIMENTO 1: Construcción ---
-    cout << "1. Construyendo arreglo con D1.txt..." << endl;
+    // 3. Leer todas las palabras de D1.txt
+    vector<string> todasLasPalabrasD1;
     ifstream archivoD1("D1.txt");
-    auto inicioConst = chrono::high_resolution_clock::now();
     
-    char temp[100]; 
+    if (!archivoD1.is_open()) {
+        cout << "Error: No se pudo abrir el archivo D1.txt" << endl;
+        return 1;
+    }
+
+    char temp[100];
     while (archivoD1.getline(temp, 100)) {
-        if (strlen(temp) == 0) continue; 
-        unsigned char* palabra = new unsigned char[strlen(temp) + 1];
-        strcpy((char*)palabra, temp);
-        anadirPalabra(miArreglo, palabra, indice);
+        if (strlen(temp) > 0) {
+            todasLasPalabrasD1.push_back(temp);
+        }
     }
     archivoD1.close();
-    
-    auto finConst = chrono::high_resolution_clock::now();
-    cout << "Tiempo de construccion: " << chrono::duration<double>(finConst - inicioConst).count() << " segundos.\n" << endl;
 
-    // --- Cargar D2 para los siguientes experimentos ---
-    vector<string> palabrasD2;
-    ifstream archivoD2("D2.txt");
-    string linea;
-    while(getline(archivoD2, linea)) {
-        if(!linea.empty()) palabrasD2.push_back(linea);
+    // Validar que el archivo tenga suficientes palabras
+    if ((int)todasLasPalabrasD1.size() < cantidadAInsertar) {
+        cout << "Error: D1.txt solo tiene " << todasLasPalabrasD1.size() 
+             << " palabras, pero pediste " << cantidadAInsertar << "." << endl;
+        destruirArreglo(miArreglo);
+        return 1;
     }
-    archivoD2.close();
 
+    // 4. Mezclar el vector para seleccionar palabras al azar
     random_device rd;
     mt19937 g(rd());
+    shuffle(todasLasPalabrasD1.begin(), todasLasPalabrasD1.end(), g);
 
-    // --- EXPERIMENTO 2: Búsquedas ---
-    cout << "2. Buscando 10.000 palabras aleatorias..." << endl;
-    vector<string> palabrasBuscar = palabrasD2;
-    shuffle(palabrasBuscar.begin(), palabrasBuscar.end(), g);
-    int num_busquedas = min(10000, (int)palabrasBuscar.size());
+    cout << "Insertando y ordenando " << cantidadAInsertar << " palabras al azar de D1.txt..." << endl;
+
+    // 5. Medir el tiempo de inserción ordenada
+    auto inicioConst = chrono::high_resolution_clock::now();
     
-    auto inicioBusq = chrono::high_resolution_clock::now();
-    for (int i = 0; i < num_busquedas; i++) {
-        busqueda_binaria(miArreglo, (unsigned char*)palabrasBuscar[i].c_str(), indice);
-    }
-    auto finBusq = chrono::high_resolution_clock::now();
-    cout << "Tiempo total de busqueda: " << chrono::duration<double>(finBusq - inicioBusq).count() << " segundos.\n" << endl;
-
-    // --- EXPERIMENTO 3: Inserciones ---
-    cout << "3. Insertando 5.000 palabras aleatorias..." << endl;
-    int limiteIns = min(5000, (int)palabrasD2.size());
-    vector<string> palabrasInsertar(palabrasD2.begin(), palabrasD2.begin() + limiteIns);
-    shuffle(palabrasInsertar.begin(), palabrasInsertar.end(), g);
-
-    auto inicioIns = chrono::high_resolution_clock::now();
-    for(const string& p : palabrasInsertar) {
+    for (int i = 0; i < cantidadAInsertar; i++) {
+        string p = todasLasPalabrasD1[i];
         unsigned char* palabraNueva = new unsigned char[p.length() + 1];
         strcpy((char*)palabraNueva, p.c_str());
+        
         anadirPalabra(miArreglo, palabraNueva, indice);
     }
-    auto finIns = chrono::high_resolution_clock::now();
-    cout << "Tiempo total de insercion: " << chrono::duration<double>(finIns - inicioIns).count() << " segundos.\n" << endl;
+    
+    auto finConst = chrono::high_resolution_clock::now();
 
-    // --- EXPERIMENTO 4: Eliminaciones ---
-    cout << "4. Eliminando 5.000 palabras aleatorias..." << endl;
-    vector<string> palabrasEliminar;
-    if (palabrasD2.size() > 5000) palabrasEliminar.assign(palabrasD2.end() - 5000, palabrasD2.end());
-    else palabrasEliminar = palabrasD2;
-    shuffle(palabrasEliminar.begin(), palabrasEliminar.end(), g);
+    // 6. Mostrar resultados
+    double tiempoTotal = chrono::duration<double>(finConst - inicioConst).count();
+    cout << "----------------------------------------- " << endl;
+    cout << "Tiempo total de ordenamiento: " << scientific << tiempoTotal << " segundos." << endl;
+    cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
+    cout << "----------------------------------------- " << endl;
 
-    auto inicioDel = chrono::high_resolution_clock::now();
-    for(const string& p : palabrasEliminar) {
-        eliminarPalabra(miArreglo, (unsigned char*)p.c_str(), indice);
-    }
-    auto finDel = chrono::high_resolution_clock::now();
-    cout << "Tiempo total de eliminacion: " << chrono::duration<double>(finDel - inicioDel).count() << " segundos.\n" << endl;
-
+    // Liberar memoria
     destruirArreglo(miArreglo);
     return 0;
 }
