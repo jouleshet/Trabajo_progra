@@ -6,37 +6,38 @@
    usar un INDICE que guarde las posiciones de las letras, asi al buscar un elemento solo uso el valor del indice de la 1ra letra y la 
 */
 
-#include <string>
 #include <iostream>
+#include <string>
 #include <cstdlib>
+#include <vector>
 #include <fstream>
 #include <cstring>
-#include <chrono> // <-- Librería para medir tiempos de ejecución
+#include <chrono>
+#include <algorithm>
+#include <random>
 
 using namespace std;
 
-int indice[26]; // indice para cada letra del alfabeto, asumiendo que solo se usan letras minusculas
-const int CAPACIDAD_INICIAL = 100; // capacidad inicial del arreglo
+int indice[26]; 
+const int CAPACIDAD_INICIAL = 100; 
 
-// Función externa asumida en el diff para comparar strings
 int compararLexicografico(const char* str1, const char* str2) {
     return strcmp(str1, str2);
 }
 
 struct ArregloPalabras { 
-      unsigned char** palabras; // arreglo de punteros a palabras
-      int capacidad; // capacidad maxima del arreglo
-      int cantidad; // numero elementos en el arreglo
+    unsigned char** palabras; 
+    int capacidad; 
+    int cantidad; 
 };
 
 void crearArreglo(ArregloPalabras& arreglo, int capacidadInicial) {
-   arreglo.palabras = new unsigned char*[capacidadInicial]; // reservar memoria para el arreglo de punteros
-   arreglo.capacidad = capacidadInicial; // establecer la capacidad inicial
-   arreglo.cantidad = 0; // iniciar la cantidad en 0
+    arreglo.palabras = new unsigned char*[capacidadInicial]; 
+    arreglo.capacidad = capacidadInicial; 
+    arreglo.cantidad = 0; 
 }
 
 void destruirArreglo(ArregloPalabras& arreglo) {
-    // esta funcion borra TODAS las palabras y luego el arreglo
     for (int i = 0; i < arreglo.cantidad; i++) {
         delete[] arreglo.palabras[i];
     }
@@ -44,174 +45,186 @@ void destruirArreglo(ArregloPalabras& arreglo) {
 }
 
 void aumentarCapacidad(ArregloPalabras& arreglo) {
-   int nuevaCapacidad = arreglo.capacidad * 2; // la nueva capacidad es el doble de la actual [overhead]
-   unsigned char** nuevoArreglo = new unsigned char*[nuevaCapacidad]; 
+    int nuevaCapacidad = arreglo.capacidad * 2; 
+    unsigned char** nuevoArreglo = new unsigned char*[nuevaCapacidad]; 
 
-   // copiar las palabras del arreglo antiguo al nuevo
-   for (int i = 0; i < arreglo.cantidad; i++) {
-      nuevoArreglo[i] = arreglo.palabras[i];
-   }
+    for (int i = 0; i < arreglo.cantidad; i++) {
+        nuevoArreglo[i] = arreglo.palabras[i];
+    }
 
-   delete[] arreglo.palabras; // liberar la memoria del arreglo antiguo
-   arreglo.palabras = nuevoArreglo; // apuntar al nuevo arreglo
-   arreglo.capacidad = nuevaCapacidad; // actualizar la capacidad
+    delete[] arreglo.palabras; 
+    arreglo.palabras = nuevoArreglo; 
+    arreglo.capacidad = nuevaCapacidad; 
 }
 
 int busqueda_binaria(ArregloPalabras& arreglo, unsigned char* palabra, int* indice) {
-   // busqueda binaria para buscar palabra en el arreglo
-   // si el indice de la 1ra letra existe inicia ahi
-   int letra = palabra[0] - 'a';
-   int inicio = 0;
-   int fin = arreglo.cantidad - 1; 
+    int letra = palabra[0] - 'a';
+    int inicio = 0;
+    int fin = arreglo.cantidad - 1; 
 
-   if (indice[letra] != -1) {
-      inicio = indice[palabra[0] - 'a']; 
-   }
+    if (letra >= 0 && letra < 26 && indice[letra] != -1) {
+        inicio = indice[letra]; 
+    } else {
+        return -1;
+    }
    
-   // revisa el indice desde letra hasta el final, la 1ra q existe la toma como fin, sino fin sigue siendo el final
-   for (int i = letra + 1; i < 26; i++) {
-         if (indice[i] != -1) {
+    for (int i = letra + 1; i < 26; i++) {
+        if (indice[i] != -1) {
             fin = indice[i] - 1; 
             break;     
-         }
-   }
+        }
+    }
       
-   while (inicio <= fin) {
-      int medio = inicio + (fin - inicio) / 2;
-      int comparacion = compararLexicografico((char*)arreglo.palabras[medio], (char*)palabra);
+    while (inicio <= fin) {
+        int medio = inicio + (fin - inicio) / 2;
+        int comparacion = compararLexicografico((char*)arreglo.palabras[medio], (char*)palabra);
 
-      if (comparacion == 0) {
-         return medio;
-      } else if (comparacion < 0) {
-         inicio = medio + 1;
-      } else {
-         fin = medio - 1;
-      }
-   }
-   return -1; // Elemento no encontrado
+        if (comparacion == 0) return medio;
+        else if (comparacion < 0) inicio = medio + 1;
+        else fin = medio - 1;
+    }
+    return -1; 
 }
 
 void anadirPalabra(ArregloPalabras& arreglo, unsigned char* palabra, int* indice) {
-   if (arreglo.cantidad >= arreglo.capacidad) {
-      aumentarCapacidad(arreglo); // si el arreglo esta lleno, aumentar su capacidad
-   }
-   int posicion = arreglo.cantidad; 
-   int letra = palabra[0] - 'a'; // obtener la primera letra de la palabra y convertirla a un indice (0-25)
+    if (arreglo.cantidad >= arreglo.capacidad) aumentarCapacidad(arreglo); 
+    
+    int posicion = arreglo.cantidad; 
+    int letra = palabra[0] - 'a'; 
 
-   if (indice[letra] != -1) { 
-      posicion = indice[letra];
-   } else {
-      for (int i = letra + 1; i < 26; i++) {
-         if (indice[i] != -1) {
-            posicion = indice[i]; 
-            break;
-         }
-      }
-   }
+    if (letra >= 0 && letra < 26 && indice[letra] != -1) { 
+        posicion = indice[letra];
+    } else if (letra >= 0 && letra < 26) {
+        for (int i = letra + 1; i < 26; i++) {
+            if (indice[i] != -1) {
+                posicion = indice[i]; 
+                break;
+            }
+        }
+    }
 
-   while (posicion < arreglo.cantidad &&
-         strcmp((char*)arreglo.palabras[posicion], (char*)palabra) < 0) {
-         posicion++; 
-   }
+    while (posicion < arreglo.cantidad && strcmp((char*)arreglo.palabras[posicion], (char*)palabra) < 0) {
+        posicion++; 
+    }
 
-   // Desplazamiento manual necesario para insertar manteniendo el orden (corregido de tu diff)
-   for (int i = arreglo.cantidad; i > posicion; i--) {
-      arreglo.palabras[i] = arreglo.palabras[i - 1];
-   }
+    for (int i = arreglo.cantidad; i > posicion; i--) {
+        arreglo.palabras[i] = arreglo.palabras[i - 1];
+    }
 
-   arreglo.palabras[posicion] = palabra; // Insertar la palabra en posición
-   arreglo.cantidad++;
+    arreglo.palabras[posicion] = palabra; 
+    arreglo.cantidad++;
 
-   if (indice[letra] == -1 || posicion < indice[letra]) {
-      indice[letra] = posicion; 
-   }
-   
-   for (int i = letra + 1; i < 26; i++) {
-      if (indice[i] != -1) {
-         indice[i]++; 
-      }
-   }   
+    if (letra >= 0 && letra < 26) {
+        if (indice[letra] == -1 || posicion < indice[letra]) indice[letra] = posicion; 
+        for (int i = letra + 1; i < 26; i++) {
+            if (indice[i] != -1) indice[i]++; 
+        }
+    }
 }
 
 void eliminarPalabra(ArregloPalabras& arreglo, unsigned char* palabra, int* indice) {
-   int posicion = busqueda_binaria(arreglo, palabra, indice);
-   if (posicion == -1) {
-      return; // Palabra no encontrada
-   }
+    int posicion = busqueda_binaria(arreglo, palabra, indice);
+    if (posicion == -1) return; 
 
-   int letra = palabra[0] - 'a';
-   if (indice[letra] == posicion) {
-      // Si era la única palabra con esa letra, o la primera, se debe manejar su consistencia
-      if (posicion + 1 < arreglo.cantidad && arreglo.palabras[posicion + 1][0] - 'a' == letra) {
-          indice[letra] = posicion; // Sigue habiendo palabras con esta letra
-      } else {
-          indice[letra] = -1; // No quedan palabras con esta letra
-      }
-   }
+    int letra = palabra[0] - 'a';
+    if (letra >= 0 && letra < 26 && indice[letra] == posicion) {
+        if (posicion + 1 < arreglo.cantidad && arreglo.palabras[posicion + 1][0] - 'a' == letra) {
+            indice[letra] = posicion; 
+        } else {
+            indice[letra] = -1; 
+        }
+    }
 
-   // Liberar la memoria de la palabra eliminada
-   delete[] arreglo.palabras[posicion];
+    delete[] arreglo.palabras[posicion];
 
-   // Mover las palabras siguientes una posición hacia atrás
-   for (int i = posicion; i < arreglo.cantidad - 1; i++) {
-      arreglo.palabras[i] = arreglo.palabras[i + 1];
-   }
-   arreglo.cantidad--;
+    for (int i = posicion; i < arreglo.cantidad - 1; i++) {
+        arreglo.palabras[i] = arreglo.palabras[i + 1];
+    }
+    arreglo.cantidad--;
 
-   // Restar 1 a los índices de las letras que siguen, si existen
-   for (int i = letra + 1; i < 26; i++) {
-      if (indice[i] != -1) {
-         indice[i]--;
-      }
-   }
-}
-
-void cargarDiccionario(const string& nombreArchivo, ArregloPalabras& arreglo, int* indice) {
-   ifstream archivo(nombreArchivo);
-
-   if (!archivo.is_open()) {
-      cout << "Error al abrir el archivo: " << nombreArchivo << endl;
-      return;
-   }
-
-   // --- INICIO DE LA MEDICIÓN DE TIEMPO DE CONSTRUCCIÓN ---
-   auto inicio = chrono::high_resolution_clock::now();
-
-   char temp[100]; 
-   while (archivo.getline(temp, 100)) {
-        if (strlen(temp) == 0) continue; // Evitar líneas vacías
-
-        unsigned char* palabra = new unsigned char[strlen(temp) + 1];
-        strcpy((char*)palabra, temp);
-
-        anadirPalabra(arreglo, palabra, indice);
-   }
-
-   archivo.close();
-
-   // --- FIN DE LA MEDICIÓN DE TIEMPO DE CONSTRUCCIÓN ---
-   auto fin = chrono::high_resolution_clock::now();
-   
-   // Duración en microsegundos (puedes usar milisegundos si el archivo es gigante cambiando a chrono::milliseconds)
-   auto duracion = chrono::duration_cast<chrono::microseconds>(fin - inicio).count();
-
-   cout << "Tiempo total de construccion: " << duracion << " microsegundos." << endl;
+    if (letra >= 0 && letra < 26) {
+        for (int i = letra + 1; i < 26; i++) {
+            if (indice[i] != -1) indice[i]--;
+        }
+    }
 }
 
 int main() {
-   // Inicializar el índice
-   for (int i = 0; i < 26; i++) {
-      indice[i] = -1;
-   }
+    for (int i = 0; i < 26; i++) indice[i] = -1;
+    ArregloPalabras miArreglo;
+    crearArreglo(miArreglo, CAPACIDAD_INICIAL);
 
-   ArregloPalabras miArreglo;
-   crearArreglo(miArreglo, CAPACIDAD_INICIAL);
+    // --- EXPERIMENTO 1: Construcción ---
+    cout << "1. Construyendo arreglo con D1.txt..." << endl;
+    ifstream archivoD1("D1.txt");
+    auto inicioConst = chrono::high_resolution_clock::now();
+    
+    char temp[100]; 
+    while (archivoD1.getline(temp, 100)) {
+        if (strlen(temp) == 0) continue; 
+        unsigned char* palabra = new unsigned char[strlen(temp) + 1];
+        strcpy((char*)palabra, temp);
+        anadirPalabra(miArreglo, palabra, indice);
+    }
+    archivoD1.close();
+    
+    auto finConst = chrono::high_resolution_clock::now();
+    cout << "Tiempo de construccion: " << chrono::duration<double>(finConst - inicioConst).count() << " segundos.\n" << endl;
 
-   // Ejecución del experimento 1 (Construcción desde cero con D1.txt)
-   cargarDiccionario("D1.txt", miArreglo, indice);
+    // --- Cargar D2 para los siguientes experimentos ---
+    vector<string> palabrasD2;
+    ifstream archivoD2("D2.txt");
+    string linea;
+    while(getline(archivoD2, linea)) {
+        if(!linea.empty()) palabrasD2.push_back(linea);
+    }
+    archivoD2.close();
 
-   // Limpieza antes de salir
-   destruirArreglo(miArreglo);
+    random_device rd;
+    mt19937 g(rd());
 
-   return 0;
+    // --- EXPERIMENTO 2: Búsquedas ---
+    cout << "2. Buscando 10.000 palabras aleatorias..." << endl;
+    vector<string> palabrasBuscar = palabrasD2;
+    shuffle(palabrasBuscar.begin(), palabrasBuscar.end(), g);
+    int num_busquedas = min(10000, (int)palabrasBuscar.size());
+    
+    auto inicioBusq = chrono::high_resolution_clock::now();
+    for (int i = 0; i < num_busquedas; i++) {
+        busqueda_binaria(miArreglo, (unsigned char*)palabrasBuscar[i].c_str(), indice);
+    }
+    auto finBusq = chrono::high_resolution_clock::now();
+    cout << "Tiempo total de busqueda: " << chrono::duration<double>(finBusq - inicioBusq).count() << " segundos.\n" << endl;
+
+    // --- EXPERIMENTO 3: Inserciones ---
+    cout << "3. Insertando 5.000 palabras aleatorias..." << endl;
+    int limiteIns = min(5000, (int)palabrasD2.size());
+    vector<string> palabrasInsertar(palabrasD2.begin(), palabrasD2.begin() + limiteIns);
+    shuffle(palabrasInsertar.begin(), palabrasInsertar.end(), g);
+
+    auto inicioIns = chrono::high_resolution_clock::now();
+    for(const string& p : palabrasInsertar) {
+        unsigned char* palabraNueva = new unsigned char[p.length() + 1];
+        strcpy((char*)palabraNueva, p.c_str());
+        anadirPalabra(miArreglo, palabraNueva, indice);
+    }
+    auto finIns = chrono::high_resolution_clock::now();
+    cout << "Tiempo total de insercion: " << chrono::duration<double>(finIns - inicioIns).count() << " segundos.\n" << endl;
+
+    // --- EXPERIMENTO 4: Eliminaciones ---
+    cout << "4. Eliminando 5.000 palabras aleatorias..." << endl;
+    vector<string> palabrasEliminar;
+    if (palabrasD2.size() > 5000) palabrasEliminar.assign(palabrasD2.end() - 5000, palabrasD2.end());
+    else palabrasEliminar = palabrasD2;
+    shuffle(palabrasEliminar.begin(), palabrasEliminar.end(), g);
+
+    auto inicioDel = chrono::high_resolution_clock::now();
+    for(const string& p : palabrasEliminar) {
+        eliminarPalabra(miArreglo, (unsigned char*)p.c_str(), indice);
+    }
+    auto finDel = chrono::high_resolution_clock::now();
+    cout << "Tiempo total de eliminacion: " << chrono::duration<double>(finDel - inicioDel).count() << " segundos.\n" << endl;
+
+    destruirArreglo(miArreglo);
+    return 0;
 }
