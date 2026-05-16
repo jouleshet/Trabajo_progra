@@ -142,7 +142,7 @@ void eliminarPalabra(ArregloPalabras& arreglo, unsigned char* palabra, int* indi
 }
 
 int main(int argc, char* argv[]) {
-    // 1. Validar si el usuario pasó el argumento por consola
+    // 1. Validar si el usuario paso el argumento por consola
     if (argc < 2) {
         cout << "Error: Debes especificar la cantidad de palabras al azar." << endl;
         cout << "Uso correcto: " << argv[0] << " <cantidad_de_palabras>" << endl;
@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // 2. Convertir el argumento de texto a un número entero
+    // 2. Convertir el argumento de texto a un numero entero
     int cantidadAInsertar = atoi(argv[1]);
 
     if (cantidadAInsertar <= 0) {
@@ -221,3 +221,4 @@ int main(int argc, char* argv[]) {
     destruirArreglo(miArreglo);
     return 0;
 }
+//weeeeena poooo shaaa
