@@ -225,16 +225,21 @@ int main(int argc, char* argv[]) {
     for(const string& p : palabrasEliminar) {
         Nodo* actual = L1;
         while(actual) {
-            // Buscamos el nodo exacto a eliminar
+            // buscar el nodo exacto a eliminar en la lista base
             if (compararLexicografico(actual->clave, (const unsigned char*)p.c_str()) == 0) {
-                // Reconectar punteros de la lista base
+                
+                // reconectar punteros para aislar el nodo
                 if(actual->ant) actual->ant->sig = actual->sig;
                 else L1 = actual->sig; // Si era la cabeza
                 
                 if(actual->sig) actual->sig->ant = actual->ant;
                 
+                // limpieza
+                delete[] actual->clave; // liberamos el string dinámico
+                delete actual;          // liberamos el objeto Nodo
+
                 elimExitosas++;
-                break; // Pasamos a la siguiente palabra
+                break; // pasamos a la siguiente palabra
             }
             actual = actual->sig;
         }
