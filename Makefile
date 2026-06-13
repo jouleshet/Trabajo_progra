@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -O3
 
-all: solucion1 solucion2
+all: solucion1 solucion2 solucion3
 
 solucion1: solucion1.cpp
 	$(CXX) $(CXXFLAGS) solucion1.cpp -o solucion1
