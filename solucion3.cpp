@@ -1,30 +1,5 @@
-/*
- * INFO088 - Tarea Etapa 2
- * Solucion 3: Arbol de Busqueda (k+1)-ario
- *
- * DESCRIPCION:
- * Cada nodo del arbol almacena hasta k claves (ordenadas lexicograficamente)
- * y hasta k+1 punteros a nodos hijos. Es la generalizacion de un BST
- * (donde k=1 clave y 2 punteros) a un arbol de grado k+1.
- *
- * EJECUCION:
- *   ./solucion3 <archivo_D1> <valor_k>
- *
- * Ejemplo:
- *   ./solucion3 D1.txt 8
- *
- * El programa:
- *  1) Construye el arbol k-ario insertando todas las palabras de D1.txt
- *     y mide el tiempo de construccion.
- *  2) Toma REP palabras aleatorias de D1.txt y busca cada una en el arbol,
- *     midiendo el tiempo promedio de busqueda.
- *  3) Recorre D2.txt e intercaladamente inserta y elimina cada palabra leida,
- *     midiendo los tiempos totales de insercion y eliminacion.
- *
- * NOTA: Todos los algoritmos (busqueda, insercion, eliminacion, comparacion)
- * son implementaciones propias; no se usan funciones de la STL para resolver
- * la logica sobre los datos almacenados.
- */
+//EJECUCION: ./solucion3 <archivo_D1> <valor_k>
+//Ejemplo: ./solucion3 D1.txt 8
 
 #include <iostream>
 #include <string>
@@ -41,10 +16,10 @@ using namespace std;
 
 const int REP = 10000; // numero de busquedas en el experimento 2
 
-// ----------------------------------------------------------------------
+
 // Nodo del arbol k-ario
 // Cada nodo guarda hasta k claves ordenadas y hasta k+1 punteros a hijos.
-// ----------------------------------------------------------------------
+
 struct NodoK {
     unsigned char** claves; // arreglo de hasta k punteros a strings (claves)
     NodoK** hijos;          // arreglo de hasta k+1 punteros a nodos hijos
@@ -61,9 +36,8 @@ struct NodoK {
     }
 };
 
-// ----------------------------------------------------------------------
+
 // Funciones auxiliares
-// ----------------------------------------------------------------------
 
 // Crea una copia dinamica de una palabra
 unsigned char* copiarPalabra(const unsigned char* palabra) {
@@ -82,13 +56,12 @@ NodoK* crearNodoConClave(unsigned char* clave, int k) {
     return nodo;
 }
 
-// ----------------------------------------------------------------------
+
 // Busqueda en el arbol k-ario
 // Devuelve true si la palabra existe.
 // Complejidad: O(log_{k+1}(N) * k) para recorrer niveles y comparar dentro
 // de cada nodo (busqueda interna lineal en el arreglo de k claves), donde
 // N es el numero total de claves almacenadas.
-// ----------------------------------------------------------------------
 bool buscar(NodoK* raiz, const unsigned char* palabra) {
     NodoK* actual = raiz;
     while (actual != nullptr) {
@@ -106,10 +79,9 @@ bool buscar(NodoK* raiz, const unsigned char* palabra) {
     return false;
 }
 
-// ----------------------------------------------------------------------
 // Insercion en el arbol k-ario
 //
-// Estrategia simplificada (arbol k-ario de busqueda sin balanceo estricto):
+//    arbol k-ario de busqueda sin balanceo estricto:
 //  - Se busca la posicion correspondiente bajando por el arbol.
 //  - Si se llega a una hoja con espacio disponible (numClaves < k),
 //    se inserta ordenadamente dentro del nodo.
@@ -119,7 +91,6 @@ bool buscar(NodoK* raiz, const unsigned char* palabra) {
 // Esto mantiene el orden lexicografico entre hermanos y entre niveles,
 // cumpliendo la propiedad de busqueda del arbol (k+1)-ario, aunque el
 // arbol puede crecer de forma no perfectamente balanceada.
-// ----------------------------------------------------------------------
 NodoK* insertar(NodoK* raiz, unsigned char* palabra, int k) {
     if (raiz == nullptr) {
         return crearNodoConClave(palabra, k);
@@ -166,10 +137,7 @@ NodoK* insertar(NodoK* raiz, unsigned char* palabra, int k) {
     }
 }
 
-// ----------------------------------------------------------------------
 // Eliminacion en el arbol k-ario
-//
-// Estrategia simplificada:
 //  - Se busca el nodo que contiene la clave.
 //  - Si el nodo es hoja (todos sus hijos nulos), se elimina la clave del
 //    arreglo desplazando el resto.
@@ -177,10 +145,8 @@ NodoK* insertar(NodoK* raiz, unsigned char* palabra, int k) {
 //    lexicografico (la clave mas pequena del subarbol derecho asociado,
 //    es decir hijos[i+1]) y se elimina dicho sucesor recursivamente de su
 //    nodo hoja, manteniendo la propiedad de orden.
-//
 // Devuelve true si se elimino una clave existente, false si la palabra
 // no se encontro (las eliminaciones pueden ser no exitosas).
-// ----------------------------------------------------------------------
 
 // Elimina y retorna la clave minima (mas a la izquierda) del subarbol,
 // dejando el nodo en estado consistente.
@@ -256,10 +222,8 @@ bool eliminar(NodoK* raiz, const unsigned char* palabra) {
     return false; // no encontrada
 }
 
-// ----------------------------------------------------------------------
 // Calculo de memoria utilizada (aproximado)
 // Recorre el arbol y suma el tamano de cada nodo (estructura + claves).
-// ----------------------------------------------------------------------
 long long calcularMemoria(NodoK* raiz) {
     if (raiz == nullptr) return 0;
 
@@ -280,9 +244,7 @@ long long calcularMemoria(NodoK* raiz) {
     return total;
 }
 
-// ----------------------------------------------------------------------
 // MAIN: experimentos de construccion, busqueda, insercion y eliminacion
-// ----------------------------------------------------------------------
 int main(int argc, char* argv[]) {
     if (argc < 3) {
         cout << "Uso: ./solucion3 <archivo_D1> <valor_k>" << endl;
@@ -297,7 +259,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // ---------------- EXPERIMENTO 1: Construccion ----------------
+    // EXPERIMENTO 1: Construccion
     cout << "Cargando D1 y construyendo el arbol " << (k + 1) << "-ario (k=" << k << ")..." << endl;
 
     ifstream fileD1(archivoD1);
@@ -330,7 +292,7 @@ int main(int argc, char* argv[]) {
          << (memoria / (1024.0 * 1024.0)) << " MB)." << endl;
     cout << "Valor de k utilizado: " << k << endl;
 
-    // ---------------- EXPERIMENTO 2: Busqueda de REP claves existentes ----------------
+    // EXPERIMENTO 2: Busqueda de REP claves existentes
     cout << "\nIniciando Experimento 2: Busqueda de " << REP << " claves de D1..." << endl;
 
     vector<string> copiaD1 = palabrasD1;
@@ -356,7 +318,7 @@ int main(int argc, char* argv[]) {
     cout << "Tiempo total de busqueda: " << tiempoBusqueda.count() << " segundos." << endl;
     cout << "Tiempo promedio por palabra: " << tiempoPromedio << " segundos." << endl;
 
-    // ---------------- EXPERIMENTO 3: Insercion/Eliminacion intercalada con D2 ----------------
+    // EXPERIMENTO 3: Insercion/Eliminacion intercalada con D2 
     cout << "\nIniciando Experimento 3: Insercion/Eliminacion intercalada con D2..." << endl;
 
     ifstream fileD2("D2.txt");
