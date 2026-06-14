@@ -31,6 +31,32 @@ void enlaza_listas(Nodo* nodoA, Nodo* nodoB) {
     if (nodoB) nodoB->ant = nodoA;
 }
 
+//Funcion para evitar fugas de memoria.
+void destruirGrilla(Nodo* cabezaMasAlta) {
+    Nodo* nivelActual = cabezaMasAlta;
+
+    while (nivelActual != nullptr) {
+        // Guardamos el puntero al nivel de abajo antes de romper el nivel actual
+        Nodo* siguienteNivelAbajo = nivelActual->inf; 
+        
+        Nodo* nodoHorizontal = nivelActual;
+        while (nodoHorizontal != nullptr) {
+            Nodo* aBorrar = nodoHorizontal;
+            nodoHorizontal = nodoHorizontal->sig;
+            
+            // 1. Liberamos la memoria del texto dinámico uchar*
+            if (aBorrar->clave != nullptr) {
+                delete[] aBorrar->clave; 
+            }
+            // 2. Liberamos el objeto Nodo en sí
+            delete aBorrar; 
+        }
+        
+        // Saltamos de piso hacia abajo
+        nivelActual = siguienteNivelAbajo; 
+    }
+}
+
 // Logica de la Grilla Multinivel (Solucion 2)
 
 // Crea los niveles superiores (L2, L3... LL) cada k nodos 
@@ -250,6 +276,10 @@ int main(int argc, char* argv[]) {
 
     cout << "Eliminaciones exitosas: " << elimExitosas << endl;
     cout << "Tiempo total de eliminacion: " << tiempoDel.count() << " segundos." << endl;
+
+
+    // Limpieza de basura
+    destruirGrilla(grilla);
     return 0;
 
 }
