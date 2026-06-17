@@ -144,6 +144,10 @@ Nodo* Crea_Clave(string texto) {
 }
 
 // Main con medición de tiempo para el informe
+/*EJECUCION:
+1.-Compilar con Makefile
+2.-Ejecutar, pasandole como primer argumento el Diccionario1 (D1.txt) y como
+segundo argumento el valor de k con el que quiere ejecutar (8,32,128,512)*/
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {

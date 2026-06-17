@@ -245,6 +245,10 @@ long long calcularMemoria(NodoK* raiz) {
 }
 
 // MAIN: experimentos de construccion, busqueda, insercion y eliminacion
+/*EJECUCION:
+1.-Compilar con Makefile
+2.-Ejecutar, pasandole como primer argumento el Diccionario1 (D1.txt) y como
+segundo argumento el valor de k con el que quiere ejecutar (8,32,128,512)*/
 int main(int argc, char* argv[]) {
     if (argc < 3) {
         cout << "Uso: ./solucion3 <archivo_D1> <valor_k>" << endl;

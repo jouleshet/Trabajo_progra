@@ -140,6 +140,9 @@ void eliminarPalabra(ArregloPalabras& arreglo, unsigned char* palabra, int* indi
         }
     }
 }
+/*EJECUCION:
+ 1.-Compila Usando el Makefile
+ 2.-Ejecutar, dando un valor , el cual define cuantas palabras se insertaran en esta solucion.*/
 
 int main(int argc, char* argv[]) {
     // 1. Validar si el usuario paso el argumento por consola

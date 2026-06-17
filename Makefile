@@ -1,16 +1,23 @@
+//Este es el makefile
 CXX = g++
-CXXFLAGS = -O3
+CXXFLAGS = -Wall -O3 -std=c++11
 
-all: solucion1 solucion2 solucion3
+TARGET1 = solucion1
+TARGET2 = solucion2
+TARGET3 = solucion3
 
-solucion1: solucion1.cpp
-	$(CXX) $(CXXFLAGS) solucion1.cpp -o solucion1
+DEPS = compara_ascii.cpp
 
-solucion2: solucion2.cpp
-	$(CXX) $(CXXFLAGS) solucion2.cpp -o solucion2
+all: $(TARGET1) $(TARGET2) $(TARGET3)
 
-solucion3: solucion3.cpp
-	$(CXX) $(CXXFLAGS) solucion3.cpp -o solucion3
+$(TARGET1): solucion1.cpp $(DEPS)
+	$(CXX) $(CXXFLAGS) solucion1.cpp -o $(TARGET1)
+
+$(TARGET2): solucion2.cpp $(DEPS)
+	$(CXX) $(CXXFLAGS) solucion2.cpp -o $(TARGET2)
+
+$(TARGET3): solucion3.cpp $(DEPS)
+	$(CXX) $(CXXFLAGS) solucion3.cpp -o $(TARGET3)
 
 clean:
-	del *.exe
+	rm -f $(TARGET1) $(TARGET2) $(TARGET3)
