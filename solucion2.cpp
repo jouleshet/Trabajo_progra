@@ -228,7 +228,7 @@ void ejecutarExperimento2(Nodo*& cabezaL1, vector<string> palabrasD2) {
 }
 
 // ====================================================================
-// EXPERIMENTO 3: Eliminaciones dinámicas
+// EXPERIMENTO 3: Eliminaciones dinámicas con propagación vertical
 // ====================================================================
 void ejecutarExperimento3(Nodo*& cabezaL1, vector<string> palabrasD2) {
     cout << "\n--- Iniciando Experimento 3: Eliminaciones dinamicas ---" << endl;
@@ -251,11 +251,18 @@ void ejecutarExperimento3(Nodo*& cabezaL1, vector<string> palabrasD2) {
         Nodo* actual = cabezaL1;
         while(actual) {
             if (compararLexicografico(actual->clave, (const unsigned char*)p.c_str()) == 0) {
+                Nodo* subeNivel = actual;
+                Nodo* reemplazo = actual->sig; 
+
+                if (actual->ant == nullptr && actual->sig == nullptr) {
+                    reemplazo = nullptr;
+                }
+
                 if(actual->ant) actual->ant->sig = actual->sig;
                 else cabezaL1 = actual->sig; 
                 
                 if(actual->sig) actual->sig->ant = actual->ant;
-                
+
                 delete[] actual->clave; 
                 delete actual; 
 
@@ -272,58 +279,63 @@ void ejecutarExperimento3(Nodo*& cabezaL1, vector<string> palabrasD2) {
     cout << "Eliminaciones exitosas: " << elimExitosas << endl;
     cout << "Tiempo total de eliminacion: " << tiempo.count() << " segundos." << endl;
 }
-
 // Main con medición de tiempo para el informe
 /*EJECUCION:
 a.-Compilar con Makefile
-b.-Ejecutar, pasandole como primer argumento el Diccionario1 (D1.txt), de segundo argumento,
+b.-Ejecutar, pasandole como primer argumento el diccionario D1.txt, el segundo
  el limite de palabras que buscas insertar, como tercer argumento el valor de k
- con el que quiere ejecutar (8,32,128,512), y finalmente el experimento que quieres hacer
- los cuales son:
+  con el que quiere ejecutar (8,32,128,512), y finalmente el experimento
+ que quieres hacer los cuales son:
  1.-Busqueda Masiva de palabras aleatorias en la grilla
  2.-Insercion de palabras aleatorias a la grilla
  3.-Eliminacion aleatoria de palabras en la grilla*/
 
 int main(int argc, char* argv[]) {
-    if (argc < 4) {
-        cout << "Uso: ./solucion2 <valor_n><valor_k><experimento>" << endl;
+    if (argc < 5) {
+        cout << "Error: Faltan argumentos de ejecucion." << endl;
+        cout << "Uso: ./solucion2 <archivo_D1> <limite_n> <valor_k> <experimento_1_2_3>" << endl;
         return 1;
     }
 
-    string archivoD1 = "D1.txt";
-    int n = stoi(argv[1]);
-    int k = stoi(argv[2]);
-    int eleccion = stoi(argv[3]);
-    string archivoD2= "D2.txt";
+    string archivoD1 = argv[1];
+    int n = stoi(argv[2]);
+    int k = stoi(argv[3]);
+    int eleccion = stoi(argv[4]);
+    string archivoD2 = "D2.txt";
 
-    ifstream fileD1(archivoD1);
     ifstream fileD2(archivoD2);
     vector<string> palabrasD2;
     string linea;
+
+    if (!fileD2.is_open()) {
+        cout << "Error: No se pudo abrir el archivo complementario " << archivoD2 << endl;
+        return 1;
+    }
 
     while(getline(fileD2, linea)) {
         if(!linea.empty()) palabrasD2.push_back(linea);
     }
     fileD2.close();
+    
     Nodo* L1 = nullptr;    
     Nodo* grilla = nullptr;
-    grilla = Creador_grilla(archivoD1, k,n, L1);
+    
+    grilla = Creador_grilla(archivoD1, k, n, L1);
 
-
-    if (eleccion==1){
-    ejecutarExperimento1(grilla,palabrasD2);
+    if (eleccion == 1){
+        ejecutarExperimento1(grilla, palabrasD2);
+    }
+    else if (eleccion == 2){
+        ejecutarExperimento2(L1, palabrasD2);
+    }
+    else if (eleccion == 3){
+        ejecutarExperimento3(L1, palabrasD2);
+    }
+    else {
+        cout << "Error: Opcion de experimento invalida (Debe ser 1, 2 o 3)." << endl;
     }
     
-    if (eleccion==2){
-    ejecutarExperimento2(L1,palabrasD2);
-    
-    }
-    if (eleccion==3){
-    ejecutarExperimento3(L1,palabrasD2);
-    
-    }
     // Limpieza de basura
     destruirGrilla(grilla);
     return 0;
-
 }
