@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -12,7 +13,7 @@ using namespace std;
 
 int indice[26]; 
 const int CAPACIDAD_INICIAL = 100; 
-
+#pragma region funciones 
 int compararLexicografico(const char* str1, const char* str2) {
     return strcmp(str1, str2);
 }
@@ -140,9 +141,8 @@ void eliminarPalabra(ArregloPalabras& arreglo, unsigned char* palabra, int* indi
         }
     }
 }
-/*EJECUCION:
- 1.-Compila Usando el Makefile
- 2.-Ejecutar, dando un valor , el cual define cuantas palabras se insertaran en esta solucion.*/
+
+#pragma endregion funciones
 
 int main(int argc, char* argv[]) {
     // 1. Validar si el usuario paso el argumento por consola
@@ -150,9 +150,12 @@ int main(int argc, char* argv[]) {
         cout << "Uso: ./solucion1 <Experimento> <Cantidad>" << endl;
         return 1;
     }
+
     int experimento = atoi(argv[1]);
     int cantidad = atoi(argv[2]);   
     int cantidadAInsertar = 69903;
+    
+    cout << endl;
     // region del codigo para la creacion de estructuras, la parte final no se ejecuta si experimento es 1, ya que utiliza el codigo de experimento 1
     #pragma region creacion de la estructura
     // 2. Convertir el argumento de texto a un numero entero
@@ -204,8 +207,10 @@ int main(int argc, char* argv[]) {
             strcpy((char*)palabraNueva, p.c_str());
         
             anadirPalabra(miArreglo, palabraNueva, indice);
+        }
     }
-    cout << "Insertando" << cantidadAInsertar << " palabras de D1.txt..." << endl;
+    cout << "Insertando " << cantidadAInsertar << " palabras de D1.txt..." << endl << endl ;
+    
 
     #pragma endregion creacion de la estructura 
     
@@ -237,16 +242,21 @@ int main(int argc, char* argv[]) {
     if (experimento == 2) {
         
         cout << "Experimento 2: Busqueda de palabras ya existentes" << endl;
-        cout << "Se buscaran " << cantidad << " palabras ya existentes en d1" << endl;
+        cout << "Se buscaran " << cantidad << " palabras ya existentes en d1" << endl << endl;
         
+        if ((int)todasLasPalabrasD1.size() < cantidad) {
+        cout << "Error: D1.txt solo tiene " << todasLasPalabrasD1.size() 
+             << " palabras, pero pediste " << cantidad << "." << endl;
+        destruirArreglo(miArreglo);
+        return 1;
+        }
+
         //crear semilla random
         random_device rd;
         mt19937 gen(rd());
 
         //aleatorizar d1 para que busque palabras al azar
-        shuffle(todasLasPalabrasD1.begin(),
-                todasLasPalabrasD1.end(),
-                gen);
+        shuffle(todasLasPalabrasD1.begin(),todasLasPalabrasD1.end(),gen);
         
         auto inicioBusqueda = chrono::high_resolution_clock::now();
         double promedioBusqueda = 0.0;
@@ -272,24 +282,26 @@ int main(int argc, char* argv[]) {
             promedioBusqueda += tiempoBusqueda;
 
             delete[] palabraBuscar;     
-        }
+         }
         auto finBusquedaTotal = chrono::high_resolution_clock::now();
         promedioBusqueda /= cantidad;
         
         double tiempoTotal = chrono::duration<double>(finBusquedaTotal - inicioBusqueda).count();
+        double promedioMicrosegundos = promedioBusqueda * 1e6;
 
 
-        cout << "--------------Tiempos--------------------------- " << endl;
+        cout << "--------------Tiempos--------------------------- " << endl  << endl;
         cout << "Tiempo promedio de busqueda: " << scientific << promedioBusqueda << " segundos." << endl;
-        cout << "O en formato decimal: " << fixed << promedioBusqueda << " segundos." << endl;
+        cout << "O en formato decimal: " << fixed << promedioMicrosegundos << " microsegundos." << endl;
         cout << "----------------------------------------- " << endl;
         cout << "Tiempo total de busqueda: " << scientific << tiempoTotal << " segundos." << endl;
         cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
-
     }
-    
-    
-    
+
+
+
+    // cout para que quede mas ordenada la consola
+    cout << endl << endl << endl;
     // Liberar memoria
     destruirArreglo(miArreglo);
     return 0;
