@@ -131,61 +131,52 @@ Nodo* insertarOrdenado(Nodo* cabeza, const unsigned char* palabra) {
     return cabeza;
 }
 
-Nodo* Crea_Clave(string texto) {
+Nodo* Crea_Clave(string texto,int limite) {
     ifstream archivo(texto);
     string lineas;
     Nodo* cabeza = nullptr; 
+    int contador= 0; 
     while(getline(archivo, lineas)){
         if (lineas.empty()) continue;
+        if (limite!= -1 && contador >= limite){
+            break;
+        }
         cabeza = insertarOrdenado(cabeza, (const unsigned char*)lineas.c_str());
+        contador++;
     }
     archivo.close();
     return cabeza;
 }
 
-// Main con medición de tiempo para el informe
-/*EJECUCION:
-1.-Compilar con Makefile
-2.-Ejecutar, pasandole como primer argumento el Diccionario1 (D1.txt) y como
-segundo argumento el valor de k con el que quiere ejecutar (8,32,128,512)*/
-
-int main(int argc, char* argv[]) {
-    if (argc < 4) {
-        cout << "Uso: ./solucion2 <archivo_D1> <valor_n><valor_k>" << endl;
-        return 1;
-    }
-
-    string archivoD1 = argv[1];
-    int k = stoi(argv[2]);
-
-    // EXPERIMENTO 1: Construccion
-    cout << "Cargando Diccionario D1 y construyendo niveles..." << endl;
+ // ====================================================================
+// Creador de Grilla
+// ====================================================================
+Nodo* Creador_grilla(string archivoD1, int k, int limite, Nodo*& cabezaL1) {
+    cout << "--- Iniciando Experimento 1: Construccion de la Grilla ---" << endl;
     auto inicio = chrono::high_resolution_clock::now();
 
-    Nodo* L1 = Crea_Clave(archivoD1);
-    Nodo* grilla = crearNiveles(L1, k);
+    // 1. Cargamos el texto y creamos la lista base L1 respetando el límite
+    cabezaL1 = Crea_Clave(archivoD1, limite);
+    
+    // 2. Construimos las autopistas de niveles superiores
+    Nodo* cabezaGrilla = crearNiveles(cabezaL1, k);
 
     auto fin = chrono::high_resolution_clock::now();
     chrono::duration<double> tiempo = fin - inicio;
 
     cout << "Estructura creada en: " << tiempo.count() << " segundos." << endl;
     cout << "Valor de k utilizado: " << k << endl;
-
-    // EXPERIMENTO 2: Busqueda de 10.000 palabras
-    cout << "\nIniciando Experimento 2: Busquedas..." << endl;
     
-    string archivoD2 = "D2.txt"; 
-    ifstream fileD2(archivoD2);
-    vector<string> palabrasD2;
-    string linea;
+    return cabezaGrilla; // Retornamos el tope de la grilla para las búsquedas
+}
 
-    // Cargar D2.txt en un vector
-    while(getline(fileD2, linea)) {
-        if(!linea.empty()) palabrasD2.push_back(linea);
-    }
-    fileD2.close();
+// ====================================================================
+// EXPERIMENTO 1: Búsqueda masiva en la Grilla
+// ====================================================================
+void ejecutarExperimento1(Nodo* grilla, vector<string> palabrasD2) {
+    cout << "\n--- Iniciando Experimento 2: Busquedas en la Grilla ---" << endl;
 
-    // Tomar 10.000 palabras aleatorias (mezclamos y cortamos)
+    // Desordenamos aleatoriamente el vector de prueba para simular casos reales
     random_device rd;
     mt19937 g(rd());
     shuffle(palabrasD2.begin(), palabrasD2.end(), g);
@@ -193,95 +184,143 @@ int main(int argc, char* argv[]) {
     int num_busquedas = min(10000, (int)palabrasD2.size());
     int encontradas = 0;
 
-    auto inicioBusqueda = chrono::high_resolution_clock::now();
-
+    auto inicio = chrono::high_resolution_clock::now();
     for (int i = 0; i < num_busquedas; i++) {
         const unsigned char* palabraTest = (const unsigned char*)palabrasD2[i].c_str();
         if (buscarEnGrilla(grilla, palabraTest)) {
             encontradas++;
         }
     }
-
-    auto finBusqueda = chrono::high_resolution_clock::now();
-    chrono::duration<double> tiempoBusqueda = finBusqueda - inicioBusqueda;
-    double tiempoPromedio = tiempoBusqueda.count() / num_busquedas;
+    auto fin = chrono::high_resolution_clock::now();
+    chrono::duration<double> tiempo = fin - inicio;
 
     cout << "Total busquedas: " << num_busquedas << endl;
     cout << "Palabras encontradas: " << encontradas << endl;
-    cout << "Tiempo total de busqueda: " << tiempoBusqueda.count() << " segundos." << endl;
-    cout << "Tiempo promedio por palabra: " << tiempoPromedio << " segundos." << endl;
+    cout << "Tiempo promedio por palabra: " << (tiempo.count() / num_busquedas) << " segundos." << endl;
+}
 
-    // EXPERIMENTO 3: Insercion de 5.000 claves
-    cout << "\nIniciando Experimento 3: Inserciones..." << endl;
+// ====================================================================
+// EXPERIMENTO 2: Inserciones dinámicas en caliente
+// ====================================================================
+void ejecutarExperimento2(Nodo*& cabezaL1, vector<string> palabrasD2) {
+    cout << "\n--- Iniciando Experimento 3: Inserciones dinamicas ---" << endl;
     
-    // Tomar las primeras 5000 palabras de D2
     int limiteIns = min(5000, (int)palabrasD2.size());
     vector<string> palabrasInsertar(palabrasD2.begin(), palabrasD2.begin() + limiteIns);
     
-    // Desordenar aleatoriamente
+    random_device rd;
+    mt19937 g(rd());
     shuffle(palabrasInsertar.begin(), palabrasInsertar.end(), g);
 
-    auto inicioIns = chrono::high_resolution_clock::now();
+    auto inicio = chrono::high_resolution_clock::now();
     int insExitosas = 0;
 
     for(const string& p : palabrasInsertar) {
-        L1 = insertarOrdenado(L1, (const unsigned char*)p.c_str());
+        cabezaL1 = insertarOrdenado(cabezaL1, (const unsigned char*)p.c_str());
         insExitosas++;
     }
 
-    auto finIns = chrono::high_resolution_clock::now();
-    chrono::duration<double> tiempoIns = finIns - inicioIns;
+    auto fin = chrono::high_resolution_clock::now();
+    chrono::duration<double> tiempo = fin - inicio;
 
     cout << "Inserciones realizadas: " << insExitosas << endl;
-    cout << "Tiempo total de insercion: " << tiempoIns.count() << " segundos." << endl;
+    cout << "Tiempo total de insercion: " << tiempo.count() << " segundos." << endl;
+}
 
-    // EXPERIMENTO 4: Eliminacion de 5.000 claves
-    cout << "\nIniciando Experimento 4: Eliminaciones..." << endl;
+// ====================================================================
+// EXPERIMENTO 3: Eliminaciones dinámicas
+// ====================================================================
+void ejecutarExperimento3(Nodo*& cabezaL1, vector<string> palabrasD2) {
+    cout << "\n--- Iniciando Experimento 4: Eliminaciones dinamicas ---" << endl;
     
     vector<string> palabrasEliminar;
     if (palabrasD2.size() > 5000) {
-        // Tomar las ultimas 5000
         palabrasEliminar.assign(palabrasD2.end() - 5000, palabrasD2.end());
     } else {
         palabrasEliminar = palabrasD2;
     }
     
-    // Desordenar aleatoriamente
+    random_device rd;
+    mt19937 g(rd());
     shuffle(palabrasEliminar.begin(), palabrasEliminar.end(), g);
 
-    auto inicioDel = chrono::high_resolution_clock::now();
+    auto inicio = chrono::high_resolution_clock::now();
     int elimExitosas = 0;
 
     for(const string& p : palabrasEliminar) {
-        Nodo* actual = L1;
+        Nodo* actual = cabezaL1;
         while(actual) {
-            // buscar el nodo exacto a eliminar en la lista base
             if (compararLexicografico(actual->clave, (const unsigned char*)p.c_str()) == 0) {
-                
-                // reconectar punteros para aislar el nodo
                 if(actual->ant) actual->ant->sig = actual->sig;
-                else L1 = actual->sig; // Si era la cabeza
+                else cabezaL1 = actual->sig; 
                 
                 if(actual->sig) actual->sig->ant = actual->ant;
                 
-                // limpieza
-                delete[] actual->clave; // liberamos el string dinámico
-                delete actual;          // liberamos el objeto Nodo
+                delete[] actual->clave; 
+                delete actual; 
 
                 elimExitosas++;
-                break; // pasamos a la siguiente palabra
+                break; 
             }
             actual = actual->sig;
         }
     }
 
-    auto finDel = chrono::high_resolution_clock::now();
-    chrono::duration<double> tiempoDel = finDel - inicioDel;
+    auto fin = chrono::high_resolution_clock::now();
+    chrono::duration<double> tiempo = fin - inicio;
 
     cout << "Eliminaciones exitosas: " << elimExitosas << endl;
-    cout << "Tiempo total de eliminacion: " << tiempoDel.count() << " segundos." << endl;
+    cout << "Tiempo total de eliminacion: " << tiempo.count() << " segundos." << endl;
+}
+
+// Main con medición de tiempo para el informe
+/*EJECUCION:
+a.-Compilar con Makefile
+b.-Ejecutar, pasandole como primer argumento el Diccionario1 (D1.txt), de segundo argumento,
+ el limite de palabras que buscas insertar, como tercer argumento el valor de k
+ con el que quiere ejecutar (8,32,128,512), y finalmente el experimento que quieres hacer
+ los cuales son:
+ 1.-Busqueda Masiva de palabras aleatorias en la grilla
+ 2.-Insercion de palabras aleatorias a la grilla
+ 3.-Eliminacion aleatoria de palabras en la grilla*/
+
+int main(int argc, char* argv[]) {
+    if (argc < 5) {
+        cout << "Uso: ./solucion2 <archivo_D1> <valor_n><valor_k><experimento>" << endl;
+        return 1;
+    }
+
+    string archivoD1 = argv[1];
+    int n = stoi(argv[2]);
+    int k = stoi(argv[3]);
+    int eleccion = stoi(argv[4]);
+    string archivoD2= "D2.txt";
+
+    ifstream fileD2(archivoD2);
+    vector<string> palabrasD2;
+    string linea;
+
+    while(getline(fileD2, linea)) {
+        if(!linea.empty()) palabrasD2.push_back(linea);
+    }
+    fileD2.close();
+    Nodo* L1 = nullptr;    
+    Nodo* grilla = nullptr;
+    grilla = Creador_grilla(archivoD1, k,n, L1);
 
 
+    if (eleccion==1){
+    ejecutarExperimento1(grilla,palabrasD2);
+    }
+    
+    if (eleccion==2){
+    ejecutarExperimento2(L1,palabrasD2);
+    
+    }
+    if (eleccion==3){
+    ejecutarExperimento3(L1,palabrasD2);
+    
+    }
     // Limpieza de basura
     destruirGrilla(grilla);
     return 0;
