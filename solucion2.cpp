@@ -152,7 +152,7 @@ Nodo* Crea_Clave(string texto,int limite) {
 // Creador de Grilla
 // ====================================================================
 Nodo* Creador_grilla(string archivoD1, int k, int limite, Nodo*& cabezaL1) {
-    cout << "--- Iniciando Experimento 1: Construccion de la Grilla ---" << endl;
+    cout << "--- Iniciando Construccion de la Grilla ---" << endl;
     auto inicio = chrono::high_resolution_clock::now();
 
     // 1. Cargamos el texto y creamos la lista base L1 respetando el límite
@@ -174,7 +174,7 @@ Nodo* Creador_grilla(string archivoD1, int k, int limite, Nodo*& cabezaL1) {
 // EXPERIMENTO 1: Búsqueda masiva en la Grilla
 // ====================================================================
 void ejecutarExperimento1(Nodo* grilla, vector<string> palabrasD2) {
-    cout << "\n--- Iniciando Experimento 2: Busquedas en la Grilla ---" << endl;
+    cout << "\n--- Iniciando Experimento 1: Busquedas en la Grilla ---" << endl;
 
     // Desordenamos aleatoriamente el vector de prueba para simular casos reales
     random_device rd;
@@ -203,7 +203,7 @@ void ejecutarExperimento1(Nodo* grilla, vector<string> palabrasD2) {
 // EXPERIMENTO 2: Inserciones dinámicas en caliente
 // ====================================================================
 void ejecutarExperimento2(Nodo*& cabezaL1, vector<string> palabrasD2) {
-    cout << "\n--- Iniciando Experimento 3: Inserciones dinamicas ---" << endl;
+    cout << "\n--- Iniciando Experimento 2: Inserciones dinamicas ---" << endl;
     
     int limiteIns = min(5000, (int)palabrasD2.size());
     vector<string> palabrasInsertar(palabrasD2.begin(), palabrasD2.begin() + limiteIns);
@@ -231,7 +231,7 @@ void ejecutarExperimento2(Nodo*& cabezaL1, vector<string> palabrasD2) {
 // EXPERIMENTO 3: Eliminaciones dinámicas
 // ====================================================================
 void ejecutarExperimento3(Nodo*& cabezaL1, vector<string> palabrasD2) {
-    cout << "\n--- Iniciando Experimento 4: Eliminaciones dinamicas ---" << endl;
+    cout << "\n--- Iniciando Experimento 3: Eliminaciones dinamicas ---" << endl;
     
     vector<string> palabrasEliminar;
     if (palabrasD2.size() > 5000) {
@@ -285,17 +285,18 @@ b.-Ejecutar, pasandole como primer argumento el Diccionario1 (D1.txt), de segund
  3.-Eliminacion aleatoria de palabras en la grilla*/
 
 int main(int argc, char* argv[]) {
-    if (argc < 5) {
-        cout << "Uso: ./solucion2 <archivo_D1> <valor_n><valor_k><experimento>" << endl;
+    if (argc < 4) {
+        cout << "Uso: ./solucion2 <valor_n><valor_k><experimento>" << endl;
         return 1;
     }
 
-    string archivoD1 = argv[1];
-    int n = stoi(argv[2]);
-    int k = stoi(argv[3]);
-    int eleccion = stoi(argv[4]);
+    string archivoD1 = "D1.txt";
+    int n = stoi(argv[1]);
+    int k = stoi(argv[2]);
+    int eleccion = stoi(argv[3]);
     string archivoD2= "D2.txt";
 
+    ifstream fileD1(archivoD1);
     ifstream fileD2(archivoD2);
     vector<string> palabrasD2;
     string linea;
