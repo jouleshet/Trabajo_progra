@@ -11,6 +11,7 @@
 
 using namespace std;
 
+#pragma region funciones y estructuras
 struct Nodo {
     unsigned char* clave; 
     Nodo* sig;            
@@ -152,7 +153,7 @@ Nodo* Crea_Clave(string texto,int limite) {
 // Creador de Grilla
 // ====================================================================
 Nodo* Creador_grilla(string archivoD1, int k, int limite, Nodo*& cabezaL1) {
-    cout << "--- Iniciando Construccion de la Grilla ---" << endl;
+    cout << "-------- Iniciando Construccion de la Grilla ---------" << endl;
     auto inicio = chrono::high_resolution_clock::now();
 
     // 1. Cargamos el texto y creamos la lista base L1 respetando el límite
@@ -166,15 +167,19 @@ Nodo* Creador_grilla(string archivoD1, int k, int limite, Nodo*& cabezaL1) {
 
     cout << "Estructura creada en: " << tiempo.count() << " segundos." << endl;
     cout << "Valor de k utilizado: " << k << endl;
+    cout << "------------------------------------------------------" << endl;
     
     return cabezaGrilla; // Retornamos el tope de la grilla para las búsquedas
 }
+#pragma endregion funciones y estructuras
 
+#pragma region experimentos
 // ====================================================================
 // EXPERIMENTO 1: Búsqueda masiva en la Grilla
 // ====================================================================
 void ejecutarExperimento1(Nodo* grilla, vector<string> palabrasD2) {
-    cout << "\n--- Iniciando Experimento 1: Busquedas en la Grilla ---" << endl;
+    
+    cout << "\n--- Iniciando Experimento 1: Busqueda en la Grilla ---" << endl;
 
     // Desordenamos aleatoriamente el vector de prueba para simular casos reales
     random_device rd;
@@ -192,11 +197,14 @@ void ejecutarExperimento1(Nodo* grilla, vector<string> palabrasD2) {
         }
     }
     auto fin = chrono::high_resolution_clock::now();
-    chrono::duration<double> tiempo = fin - inicio;
+    double tiempo = chrono::duration<double>(fin - inicio).count();
 
-    cout << "Total busquedas: " << num_busquedas << endl;
+    cout << "------------------------------------------------------" << endl;
+    cout << "Total de busquedas: " << num_busquedas << endl;
     cout << "Palabras encontradas: " << encontradas << endl;
-    cout << "Tiempo promedio por palabra: " << (tiempo.count() / num_busquedas) << " segundos." << endl;
+    cout << "Tiempo promedio por palabra: " << scientific << (tiempo / num_busquedas) << " segundos." << endl;
+    cout << "O en formato decimal: " << fixed << ((tiempo / num_busquedas) * 1e6) << " microsegundos." << endl;
+    cout << "------------------------------------------------------" << endl;
 }
 
 // ====================================================================
@@ -221,10 +229,10 @@ void ejecutarExperimento2(Nodo*& cabezaL1, vector<string> palabrasD2) {
     }
 
     auto fin = chrono::high_resolution_clock::now();
-    chrono::duration<double> tiempo = fin - inicio;
+    double tiempo = chrono::duration<double>(fin - inicio).count();
 
     cout << "Inserciones realizadas: " << insExitosas << endl;
-    cout << "Tiempo total de insercion: " << tiempo.count() << " segundos." << endl;
+    cout << "Tiempo total de insercion: " << tiempo << " segundos." << endl;
 }
 
 // ====================================================================
@@ -274,21 +282,24 @@ void ejecutarExperimento3(Nodo*& cabezaL1, vector<string> palabrasD2) {
     }
 
     auto fin = chrono::high_resolution_clock::now();
-    chrono::duration<double> tiempo = fin - inicio;
+    double tiempo = chrono::duration<double>(fin - inicio).count();
 
     cout << "Eliminaciones exitosas: " << elimExitosas << endl;
-    cout << "Tiempo total de eliminacion: " << tiempo.count() << " segundos." << endl;
+    cout << "Tiempo total de eliminacion: " << tiempo << " segundos." << endl;
 }
+
+#pragma endregion experimentos
+
 // Main con medición de tiempo para el informe
-/*EJECUCION:
-a.-Compilar con Makefile
-b.-Ejecutar, pasandole como primer argumento el diccionario D1.txt, el segundo
- el limite de palabras que buscas insertar, como tercer argumento el valor de k
-  con el que quiere ejecutar (8,32,128,512), y finalmente el experimento
- que quieres hacer los cuales son:
- 1.-Busqueda Masiva de palabras aleatorias en la grilla
- 2.-Insercion de palabras aleatorias a la grilla
- 3.-Eliminacion aleatoria de palabras en la grilla*/
+    /*EJECUCION:
+    a.-Compilar con Makefile
+    b.-Ejecutar, pasandole como primer argumento el diccionario D1.txt, el segundo
+    el limite de palabras que buscas insertar, como tercer argumento el valor de k
+    con el que quiere ejecutar (8,32,128,512), y finalmente el experimento
+    que quieres hacer los cuales son:
+    1.-Busqueda Masiva de palabras aleatorias en la grilla
+    2.-Insercion de palabras aleatorias a la grilla
+    3.-Eliminacion aleatoria de palabras en la grilla*/
 
 int main(int argc, char* argv[]) {
     if (argc < 5) {
@@ -296,6 +307,8 @@ int main(int argc, char* argv[]) {
         cout << "Uso: ./solucion2 <archivo_D1> <limite_n> <valor_k> <experimento_1_2_3>" << endl;
         return 1;
     }
+
+    cout << endl << "----------------- INICIANDO PROGRAMA -----------------" << endl;
 
     string archivoD1 = argv[1];
     int n = stoi(argv[2]);
@@ -322,6 +335,8 @@ int main(int argc, char* argv[]) {
     
     grilla = Creador_grilla(archivoD1, k, n, L1);
 
+    cout << endl;
+
     if (eleccion == 1){
         ejecutarExperimento1(grilla, palabrasD2);
     }
@@ -335,6 +350,7 @@ int main(int argc, char* argv[]) {
         cout << "Error: Opcion de experimento invalida (Debe ser 1, 2 o 3)." << endl;
     }
     
+    cout << endl << "----------------- PROGRAMA FINALIZADO -----------------" << endl<< endl;
     // Limpieza de basura
     destruirGrilla(grilla);
     return 0;

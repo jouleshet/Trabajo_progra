@@ -157,8 +157,10 @@ int main(int argc, char* argv[]) {
     int cantidadAInsertar = 69903;
     
     cout << endl;
+    
     // region del codigo para la creacion de estructuras, la parte final no se ejecuta si experimento es 1, ya que utiliza el codigo de experimento 1
     #pragma region creacion de la estructura
+
     // 2. Convertir el argumento de texto a un numero entero
     if (experimento == 1) {
         cantidadAInsertar = cantidad; // valor definido por el usuario );
