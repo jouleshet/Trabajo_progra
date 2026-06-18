@@ -214,6 +214,27 @@ int main(int argc, char* argv[]) {
 
     #pragma endregion creacion de la estructura 
     
+    #pragma region cargar d2
+
+    vector<string> palabrasD2;
+    ifstream archivoD2("D2.txt");
+    
+    if (!archivoD2.is_open()) {
+        cout << "Error: No se pudo abrir el archivo D2.txt" << endl;
+        destruirArreglo(miArreglo);
+        return 1;
+    }
+
+    char temp2[100];
+    while (archivoD2.getline(temp2, 100)) {
+        if (strlen(temp2) > 0) {
+            palabrasD2.push_back(temp2);
+        }
+    }
+    archivoD2.close();
+    #pragma endregion cargar d2
+
+
     //tiempo en crear estructura
     if (experimento == 1) {
 
@@ -233,13 +254,21 @@ int main(int argc, char* argv[]) {
         }
         
         auto finConst = chrono::high_resolution_clock::now();
-
-        // 6. Mostrar resultados
         double tiempoTotal = chrono::duration<double>(finConst - inicioConst).count();
+
+        size_t memoriaPalabras = 0;
+
+        for (int i = 0; i < miArreglo.cantidad; i++) {
+            memoriaPalabras += strlen((char*)miArreglo.palabras[i]) + 1;
+        }
+        double memoriaMB =memoriaPalabras / (1024.0 * 1024.0);
+
         cout << "----------------------------------------- " << endl;
-        cout << "Tiempo total de ordenamiento: " << scientific << tiempoTotal << " segundos." << endl;
+        cout << "Tiempo total de insercion: " << scientific << tiempoTotal << " segundos." << endl;
         cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
         cout << "----------------------------------------- " << endl;
+        cout << "cantidad de palabras en la estructura: " << miArreglo.cantidad << " palabras." << endl;
+        cout << "espacio  en memoria: " << memoriaMB << " MB." << endl;
     }
 
     // busqueda de palabras desde D1
@@ -308,36 +337,10 @@ int main(int argc, char* argv[]) {
         
         cout << "Experimento 3: Insercion y eliminacion intercalada" << endl;
         cout << "------------------------------------------ " << endl;
-        cout << "Se insertaran y eliminaran palabras de D2.txt" << endl << endl;
+        cout << "Se insertaran y eliminaran palabras desde D2.txt" << endl << endl;
         
-        #pragma region cargar d2
 
-        vector<string> palabrasD2;
-        ifstream archivoD2("D2.txt");
-        
-        if (!archivoD2.is_open()) {
-            cout << "Error: No se pudo abrir el archivo D2.txt" << endl;
-            destruirArreglo(miArreglo);
-            return 1;
-        }
 
-        char temp[100];
-        while (archivoD2.getline(temp, 100)) {
-            if (strlen(temp) > 0) {
-                palabrasD2.push_back(temp);
-            }
-        }
-        archivoD2.close();
-
-        if ((int)palabrasD2.size() < cantidad) {
-            cout << "Error: D2.txt solo tiene " << palabrasD2.size() 
-                 << " palabras, pero pediste " << cantidad << "." << endl;
-            destruirArreglo(miArreglo);
-            return 1;
-        }
-        #pragma endregion cargar d2
-
-        cantidad = palabrasD2.size(); // usar todas las palabras
         int inserciones = 0;
         int eliminaciones = 0;
 
@@ -369,7 +372,7 @@ int main(int argc, char* argv[]) {
         cout << "--------------Tiempos--------------------------- " << endl  << endl;
         cout << "Tiempo total: " << scientific << tiempoTotal << " segundos." << endl;
         cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
-        cout << "------------------------------------------------ " << endl;   
+        cout << "--------------Totales--------------------------- " << endl;   
         cout << "Total de inserciones: " << inserciones << endl;
         cout << "Total de eliminaciones: " << eliminaciones << endl;
         cout << "------------------------------------------------ " << endl;
