@@ -1,0 +1,34 @@
+#todo el git ignore es cortesia de chatgpt, gracias chatgpt, eres el mejor (Escrito por copilot, gracias copilot, eres el mejor)
+# Me da miedo lo que copilot escribio en la 1ra linea
+# Si alguien de verdad esta leyendo esto, que me mande un mensaje y le regalo un chocman.
+# Ejecutables
+solucion1
+solucion2
+solucion3
+solucion1.exe
+solucion2.exe
+solucion3.exe
+
+# Objetos
+*.o
+*.obj
+
+# Ejecutables genéricos
+*.exe
+
+# Archivos temporales
+*.tmp
+*.log
+
+# Carpetas de VS Code
+.vscode/
+
+# Archivos de Visual Studio
+.vs/
+*.suo
+*.user
+
+# Archivos de compilación de CMake (si algún día lo usas)
+build/
+CMakeFiles/
+CMakeCache.txt
