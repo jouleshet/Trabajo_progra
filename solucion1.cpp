@@ -13,7 +13,8 @@ using namespace std;
 
 int indice[26]; 
 const int CAPACIDAD_INICIAL = 100; 
-#pragma region funciones 
+#pragma region funciones
+
 int compararLexicografico(const char* str1, const char* str2) {
     return strcmp(str1, str2);
 }
@@ -209,13 +210,16 @@ int main(int argc, char* argv[]) {
             anadirPalabra(miArreglo, palabraNueva, indice);
         }
     }
-    cout << "Insertando " << cantidadAInsertar << " palabras de D1.txt..." << endl << endl ;
     
 
     #pragma endregion creacion de la estructura 
     
-    // Si experimento=1, mide el tiempo de insercion, sino, no lo mide.
+    //tiempo en crear estructura
     if (experimento == 1) {
+
+        cout << "Experimento 1: Creacion de la estructura" << endl;
+        cout << "----------------------------------------- " << endl;
+        cout << "Se insertaran " << cantidadAInsertar << " palabras de D1.txt" << endl << endl;
 
         auto inicioConst = chrono::high_resolution_clock::now();
         
@@ -238,10 +242,11 @@ int main(int argc, char* argv[]) {
         cout << "----------------------------------------- " << endl;
     }
 
-    
+    // busqueda de palabras desde D1
     if (experimento == 2) {
         
         cout << "Experimento 2: Busqueda de palabras ya existentes" << endl;
+        cout << "------------------------------------------ " << endl;
         cout << "Se buscaran " << cantidad << " palabras ya existentes en d1" << endl << endl;
         
         if ((int)todasLasPalabrasD1.size() < cantidad) {
@@ -298,10 +303,85 @@ int main(int argc, char* argv[]) {
         cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
     }
 
+    // insercion e eliminacion intercalada desde D2
+    if (experimento == 3){
+        
+        cout << "Experimento 3: Insercion y eliminacion intercalada" << endl;
+        cout << "------------------------------------------ " << endl;
+        cout << "Se insertaran y eliminaran palabras de D2.txt" << endl << endl;
+        
+        #pragma region cargar d2
+
+        vector<string> palabrasD2;
+        ifstream archivoD2("D2.txt");
+        
+        if (!archivoD2.is_open()) {
+            cout << "Error: No se pudo abrir el archivo D2.txt" << endl;
+            destruirArreglo(miArreglo);
+            return 1;
+        }
+
+        char temp[100];
+        while (archivoD2.getline(temp, 100)) {
+            if (strlen(temp) > 0) {
+                palabrasD2.push_back(temp);
+            }
+        }
+        archivoD2.close();
+
+        if ((int)palabrasD2.size() < cantidad) {
+            cout << "Error: D2.txt solo tiene " << palabrasD2.size() 
+                 << " palabras, pero pediste " << cantidad << "." << endl;
+            destruirArreglo(miArreglo);
+            return 1;
+        }
+        #pragma endregion cargar d2
+
+        cantidad = palabrasD2.size(); // usar todas las palabras
+        int inserciones = 0;
+        int eliminaciones = 0;
+
+        auto inicioIntercalado = chrono::high_resolution_clock::now();
+        
+        for (int i = 0; i < cantidad; i++) {
+            
+            //insericion
+            if (i%2 == 0){   
+                string pInsertar = palabrasD2[i];
+                unsigned char* palabraNueva = new unsigned char[pInsertar.length() + 1];
+                strcpy((char*)palabraNueva, pInsertar.c_str());
+                anadirPalabra(miArreglo, palabraNueva, indice);
+                inserciones++;
+            }
+            //eliminacion
+            else{
+                string pEliminar = palabrasD2[i];
+                unsigned char* palabraEliminar = new unsigned char[pEliminar.length() + 1];
+                strcpy((char*)palabraEliminar, pEliminar.c_str());
+                eliminarPalabra(miArreglo, palabraEliminar, indice);
+                delete[] palabraEliminar; 
+                eliminaciones++;
+            }
+        }
+        auto finIntercalado = chrono::high_resolution_clock::now();
+        double tiempoTotal = chrono::duration<double>(finIntercalado - inicioIntercalado).count();
+
+        cout << "--------------Tiempos--------------------------- " << endl  << endl;
+        cout << "Tiempo total: " << scientific << tiempoTotal << " segundos." << endl;
+        cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
+        cout << "------------------------------------------------ " << endl;   
+        cout << "Total de inserciones: " << inserciones << endl;
+        cout << "Total de eliminaciones: " << eliminaciones << endl;
+        cout << "------------------------------------------------ " << endl;
+    }
+        
+    
+
+    
 
 
     // cout para que quede mas ordenada la consola
-    cout << endl << endl << endl;
+    cout << endl << endl;
     // Liberar memoria
     destruirArreglo(miArreglo);
     return 0;
