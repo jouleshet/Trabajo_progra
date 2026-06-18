@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -12,7 +13,7 @@ using namespace std;
 
 int indice[26]; 
 const int CAPACIDAD_INICIAL = 100; 
-
+#pragma region funciones 
 int compararLexicografico(const char* str1, const char* str2) {
     return strcmp(str1, str2);
 }
@@ -140,9 +141,8 @@ void eliminarPalabra(ArregloPalabras& arreglo, unsigned char* palabra, int* indi
         }
     }
 }
-/*EJECUCION:
- 1.-Compila Usando el Makefile
- 2.-Ejecutar, dando un valor , el cual define cuantas palabras se insertaran en esta solucion.*/
+
+#pragma endregion funciones
 
 int main(int argc, char* argv[]) {
     // 1. Validar si el usuario paso el argumento por consola
@@ -150,15 +150,17 @@ int main(int argc, char* argv[]) {
         cout << "Uso: ./solucion1 <Experimento> <Cantidad>" << endl;
         return 1;
     }
+
     int experimento = atoi(argv[1]);
     int cantidad = atoi(argv[2]);   
-
+    int cantidadAInsertar = 69903;
+    
+    cout << endl;
+    // region del codigo para la creacion de estructuras, la parte final no se ejecuta si experimento es 1, ya que utiliza el codigo de experimento 1
+    #pragma region creacion de la estructura
     // 2. Convertir el argumento de texto a un numero entero
     if (experimento == 1) {
-         cantidadAInsertar = cantidad; // valor definido por el usuario );
-    }
-    else{
-         cantidadAInsertar = 69903; // valor para que sea todo el diccionario
+        cantidadAInsertar = cantidad; // valor definido por el usuario );
     }
 
     if (cantidadAInsertar <= 0) {
@@ -198,94 +200,108 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    cout << "Insertando" << cantidadAInsertar << " palabras de D1.txt..." << endl;
-
-    // Si experimento=1, mide el tiempo de insercion, sino, no lo mide.
-    if (experimento == 1) {
-
-    auto inicioConst = chrono::high_resolution_clock::now();
-    
-    for (int i = 0; i < cantidadAInsertar; i++) {
-        string p = todasLasPalabrasD1[i];
-        unsigned char* palabraNueva = new unsigned char[p.length() + 1];
-        strcpy((char*)palabraNueva, p.c_str());
-        
-        anadirPalabra(miArreglo, palabraNueva, indice);
-    }
-    
-    auto finConst = chrono::high_resolution_clock::now();
-
-    // 6. Mostrar resultados
-    double tiempoTotal = chrono::duration<double>(finConst - inicioConst).count();
-    cout << "----------------------------------------- " << endl;
-    cout << "Tiempo total de ordenamiento: " << scientific << tiempoTotal << " segundos." << endl;
-    cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
-    cout << "----------------------------------------- " << endl;
-    }
-    else {
+    if (experimento != 1) {
         for (int i = 0; i < cantidadAInsertar; i++) {
             string p = todasLasPalabrasD1[i];
             unsigned char* palabraNueva = new unsigned char[p.length() + 1];
             strcpy((char*)palabraNueva, p.c_str());
         
             anadirPalabra(miArreglo, palabraNueva, indice);
+        }
     }
-    }
+    cout << "Insertando " << cantidadAInsertar << " palabras de D1.txt..." << endl << endl ;
     
 
+    #pragma endregion creacion de la estructura 
+    
+    // Si experimento=1, mide el tiempo de insercion, sino, no lo mide.
+    if (experimento == 1) {
 
+        auto inicioConst = chrono::high_resolution_clock::now();
+        
+        for (int i = 0; i < cantidadAInsertar; i++) {
+
+            string p = todasLasPalabrasD1[i];
+            unsigned char* palabraNueva = new unsigned char[p.length() + 1];
+            strcpy((char*)palabraNueva, p.c_str());
+            
+            anadirPalabra(miArreglo, palabraNueva, indice);
+        }
+        
+        auto finConst = chrono::high_resolution_clock::now();
+
+        // 6. Mostrar resultados
+        double tiempoTotal = chrono::duration<double>(finConst - inicioConst).count();
+        cout << "----------------------------------------- " << endl;
+        cout << "Tiempo total de ordenamiento: " << scientific << tiempoTotal << " segundos." << endl;
+        cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
+        cout << "----------------------------------------- " << endl;
+    }
+
+    
     if (experimento == 2) {
         
         cout << "Experimento 2: Busqueda de palabras ya existentes" << endl;
-        cout << "Se buscaran " << cantidad << " palabras ya existentes en d1" << endl;
+        cout << "Se buscaran " << cantidad << " palabras ya existentes en d1" << endl << endl;
         
+        if ((int)todasLasPalabrasD1.size() < cantidad) {
+        cout << "Error: D1.txt solo tiene " << todasLasPalabrasD1.size() 
+             << " palabras, pero pediste " << cantidad << "." << endl;
+        destruirArreglo(miArreglo);
+        return 1;
+        }
+
         //crear semilla random
         random_device rd;
         mt19937 gen(rd());
 
         //aleatorizar d1 para que busque palabras al azar
-        shuffle(todasLasPalabrasD1.begin(),
-                todasLasPalabrasD1.end(),
-                gen);
+        shuffle(todasLasPalabrasD1.begin(),todasLasPalabrasD1.end(),gen);
         
         auto inicioBusqueda = chrono::high_resolution_clock::now();
-        auto busquedaAnterior = inicioBusqueda;
         double promedioBusqueda = 0.0;
 
-
         for (int i = 0; i < cantidad; i++) {
-
+            
+            // parte del for para las palabrrars
             string p = todasLasPalabrasD1[i];
-
             unsigned char* palabraBuscar = new unsigned char[p.length() + 1];
             strcpy((char*)palabraBuscar, p.c_str());
-            
+
+            //parte del for SOLO de la busqueda, el tiempo se tiene que medir aca
+            auto InicioBusquedaActual = chrono::high_resolution_clock::now();
+
             int resultado = busqueda_binaria(miArreglo, palabraBuscar, indice);
             if (resultado == -1) {
                 cout << "Error: No se encontró la palabra '" << p << "' que debería existir." << endl;
-            }
+            }   
 
-            auto finBusqueda = chrono::high_resolution_clock::now();
-            double tiempoBusqueda = chrono::duration<double>(finBusqueda - busquedaAnterior).count();
-                        
-            busquedaAnterior = finBusqueda;
+            auto finBusquedaActual = chrono::high_resolution_clock::now();
+            double tiempoBusqueda = chrono::duration<double>(finBusquedaActual - InicioBusquedaActual).count();
+            
             promedioBusqueda += tiempoBusqueda;
 
-
             delete[] palabraBuscar;     
-        }
+         }
+        auto finBusquedaTotal = chrono::high_resolution_clock::now();
         promedioBusqueda /= cantidad;
-        cout << "--------------Tiempos--------------------------- " << endl;
-        cout << "Tiempo promedio de busqueda: " << scientific << promedioBusqueda << " segundos." << endl;
-        cout << "O en formato decimal: " << fixed << promedioBusqueda << " segundos." << endl;
-        cout << "----------------------------------------- " << endl;
-        cout << "Tiempo total de busqueda: " << scientific << (finBusqueda - inicioBusqueda).count() << " segundos." << endl;
-        cout << "O en formato decimal: " << fixed << (finBusqueda - inicioBusqueda).count() << " segundos." << endl;
+        
+        double tiempoTotal = chrono::duration<double>(finBusquedaTotal - inicioBusqueda).count();
+        double promedioMicrosegundos = promedioBusqueda * 1e6;
 
+
+        cout << "--------------Tiempos--------------------------- " << endl  << endl;
+        cout << "Tiempo promedio de busqueda: " << scientific << promedioBusqueda << " segundos." << endl;
+        cout << "O en formato decimal: " << fixed << promedioMicrosegundos << " microsegundos." << endl;
+        cout << "----------------------------------------- " << endl;
+        cout << "Tiempo total de busqueda: " << scientific << tiempoTotal << " segundos." << endl;
+        cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
     }
-    
-    
-    
+
+
+
+    // cout para que quede mas ordenada la consola
+    cout << endl << endl << endl;
     // Liberar memoria
     destruirArreglo(miArreglo);
     return 0;
