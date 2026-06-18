@@ -1,4 +1,4 @@
-//Este es el makefile
+# Este es el makefile
 CXX = g++
 CXXFLAGS = -Wall -O3 -std=c++11
 

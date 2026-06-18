@@ -150,8 +150,8 @@ Nodo* Crea_Clave(string texto) {
 segundo argumento el valor de k con el que quiere ejecutar (8,32,128,512)*/
 
 int main(int argc, char* argv[]) {
-    if (argc < 3) {
-        cout << "Uso: ./solucion2 <archivo_D1> <valor_k>" << endl;
+    if (argc < 4) {
+        cout << "Uso: ./solucion2 <archivo_D1> <valor_n><valor_k>" << endl;
         return 1;
     }
 

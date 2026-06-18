@@ -146,15 +146,20 @@ void eliminarPalabra(ArregloPalabras& arreglo, unsigned char* palabra, int* indi
 
 int main(int argc, char* argv[]) {
     // 1. Validar si el usuario paso el argumento por consola
-    if (argc < 2) {
-        cout << "Error: Debes especificar la cantidad de palabras al azar." << endl;
-        cout << "Uso correcto: " << argv[0] << " <cantidad_de_palabras>" << endl;
-        cout << "Ejemplo: " << argv[0] << " 100" << endl;
+    if (argc < 3) {
+        cout << "Uso: ./solucion1 <Experimento> <Cantidad>" << endl;
         return 1;
     }
+    int experimento = atoi(argv[1]);
+    int cantidad = atoi(argv[2]);   
 
     // 2. Convertir el argumento de texto a un numero entero
-    int cantidadAInsertar = atoi(argv[1]);
+    if (experimento == 1) {
+         cantidadAInsertar = cantidad; // valor definido por el usuario );
+    }
+    else{
+         cantidadAInsertar = 69903; // valor para que sea todo el diccionario
+    }
 
     if (cantidadAInsertar <= 0) {
         cout << "Error: La cantidad de palabras debe ser un numero entero mayor que 0." << endl;
@@ -193,14 +198,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // 4. Mezclar el vector para seleccionar palabras al azar
-    random_device rd;
-    mt19937 g(rd());
-    shuffle(todasLasPalabrasD1.begin(), todasLasPalabrasD1.end(), g);
+    cout << "Insertando" << cantidadAInsertar << " palabras de D1.txt..." << endl;
 
-    cout << "Insertando y ordenando " << cantidadAInsertar << " palabras al azar de D1.txt..." << endl;
+    // Si experimento=1, mide el tiempo de insercion, sino, no lo mide.
+    if (experimento == 1) {
 
-    // 5. Medir el tiempo de inserción ordenada
     auto inicioConst = chrono::high_resolution_clock::now();
     
     for (int i = 0; i < cantidadAInsertar; i++) {
@@ -219,9 +221,72 @@ int main(int argc, char* argv[]) {
     cout << "Tiempo total de ordenamiento: " << scientific << tiempoTotal << " segundos." << endl;
     cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
     cout << "----------------------------------------- " << endl;
+    }
+    else {
+        for (int i = 0; i < cantidadAInsertar; i++) {
+            string p = todasLasPalabrasD1[i];
+            unsigned char* palabraNueva = new unsigned char[p.length() + 1];
+            strcpy((char*)palabraNueva, p.c_str());
+        
+            anadirPalabra(miArreglo, palabraNueva, indice);
+    }
+    }
+    
 
+
+    if (experimento == 2) {
+        
+        cout << "Experimento 2: Busqueda de palabras ya existentes" << endl;
+        cout << "Se buscaran " << cantidad << " palabras ya existentes en d1" << endl;
+        
+        //crear semilla random
+        random_device rd;
+        mt19937 gen(rd());
+
+        //aleatorizar d1 para que busque palabras al azar
+        shuffle(todasLasPalabrasD1.begin(),
+                todasLasPalabrasD1.end(),
+                gen);
+        
+        auto inicioBusqueda = chrono::high_resolution_clock::now();
+        auto busquedaAnterior = inicioBusqueda;
+        double promedioBusqueda = 0.0;
+
+
+        for (int i = 0; i < cantidad; i++) {
+
+            string p = todasLasPalabrasD1[i];
+
+            unsigned char* palabraBuscar = new unsigned char[p.length() + 1];
+            strcpy((char*)palabraBuscar, p.c_str());
+            
+            int resultado = busqueda_binaria(miArreglo, palabraBuscar, indice);
+            if (resultado == -1) {
+                cout << "Error: No se encontró la palabra '" << p << "' que debería existir." << endl;
+            }
+
+            auto finBusqueda = chrono::high_resolution_clock::now();
+            double tiempoBusqueda = chrono::duration<double>(finBusqueda - busquedaAnterior).count();
+                        
+            busquedaAnterior = finBusqueda;
+            promedioBusqueda += tiempoBusqueda;
+
+
+            delete[] palabraBuscar;     
+        }
+        promedioBusqueda /= cantidad;
+        cout << "--------------Tiempos--------------------------- " << endl;
+        cout << "Tiempo promedio de busqueda: " << scientific << promedioBusqueda << " segundos." << endl;
+        cout << "O en formato decimal: " << fixed << promedioBusqueda << " segundos." << endl;
+        cout << "----------------------------------------- " << endl;
+        cout << "Tiempo total de busqueda: " << scientific << (finBusqueda - inicioBusqueda).count() << " segundos." << endl;
+        cout << "O en formato decimal: " << fixed << (finBusqueda - inicioBusqueda).count() << " segundos." << endl;
+
+    }
+    
+    
+    
     // Liberar memoria
     destruirArreglo(miArreglo);
     return 0;
 }
-//weeeeena poooo shaaa
