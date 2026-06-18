@@ -157,10 +157,7 @@ int main(int argc, char* argv[]) {
     #pragma region creacion de la estructura
     // 2. Convertir el argumento de texto a un numero entero
     if (experimento == 1) {
-         cantidadAInsertar = cantidad; // valor definido por el usuario );
-    }
-    else{
-         cantidadAInsertar = 69903; // valor para que sea todo el diccionario
+        cantidadAInsertar = cantidad; // valor definido por el usuario );
     }
 
     if (cantidadAInsertar <= 0) {
@@ -200,31 +197,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    cout << "Insertando" << cantidadAInsertar << " palabras de D1.txt..." << endl;
-
-    // Si experimento=1, mide el tiempo de insercion, sino, no lo mide.
-    if (experimento == 1) {
-
-    auto inicioConst = chrono::high_resolution_clock::now();
-    
-    for (int i = 0; i < cantidadAInsertar; i++) {
-        string p = todasLasPalabrasD1[i];
-        unsigned char* palabraNueva = new unsigned char[p.length() + 1];
-        strcpy((char*)palabraNueva, p.c_str());
-        
-        anadirPalabra(miArreglo, palabraNueva, indice);
-    }
-    
-    auto finConst = chrono::high_resolution_clock::now();
-
-    // 6. Mostrar resultados
-    double tiempoTotal = chrono::duration<double>(finConst - inicioConst).count();
-    cout << "----------------------------------------- " << endl;
-    cout << "Tiempo total de ordenamiento: " << scientific << tiempoTotal << " segundos." << endl;
-    cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
-    cout << "----------------------------------------- " << endl;
-    }
-    else {
+    if (experimento != 1) {
         for (int i = 0; i < cantidadAInsertar; i++) {
             string p = todasLasPalabrasD1[i];
             unsigned char* palabraNueva = new unsigned char[p.length() + 1];
@@ -232,10 +205,35 @@ int main(int argc, char* argv[]) {
         
             anadirPalabra(miArreglo, palabraNueva, indice);
     }
-    }
+    cout << "Insertando" << cantidadAInsertar << " palabras de D1.txt..." << endl;
+
+    #pragma endregion creacion de la estructura 
     
+    // Si experimento=1, mide el tiempo de insercion, sino, no lo mide.
+    if (experimento == 1) {
 
+        auto inicioConst = chrono::high_resolution_clock::now();
+        
+        for (int i = 0; i < cantidadAInsertar; i++) {
 
+            string p = todasLasPalabrasD1[i];
+            unsigned char* palabraNueva = new unsigned char[p.length() + 1];
+            strcpy((char*)palabraNueva, p.c_str());
+            
+            anadirPalabra(miArreglo, palabraNueva, indice);
+        }
+        
+        auto finConst = chrono::high_resolution_clock::now();
+
+        // 6. Mostrar resultados
+        double tiempoTotal = chrono::duration<double>(finConst - inicioConst).count();
+        cout << "----------------------------------------- " << endl;
+        cout << "Tiempo total de ordenamiento: " << scientific << tiempoTotal << " segundos." << endl;
+        cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
+        cout << "----------------------------------------- " << endl;
+    }
+
+    
     if (experimento == 2) {
         
         cout << "Experimento 2: Busqueda de palabras ya existentes" << endl;
@@ -251,38 +249,42 @@ int main(int argc, char* argv[]) {
                 gen);
         
         auto inicioBusqueda = chrono::high_resolution_clock::now();
-        auto busquedaAnterior = inicioBusqueda;
         double promedioBusqueda = 0.0;
 
-
         for (int i = 0; i < cantidad; i++) {
-
+            
+            // parte del for para las palabrrars
             string p = todasLasPalabrasD1[i];
-
             unsigned char* palabraBuscar = new unsigned char[p.length() + 1];
             strcpy((char*)palabraBuscar, p.c_str());
-            
+
+            //parte del for SOLO de la busqueda, el tiempo se tiene que medir aca
+            auto InicioBusquedaActual = chrono::high_resolution_clock::now();
+
             int resultado = busqueda_binaria(miArreglo, palabraBuscar, indice);
             if (resultado == -1) {
                 cout << "Error: No se encontró la palabra '" << p << "' que debería existir." << endl;
-            }
+            }   
 
-            auto finBusqueda = chrono::high_resolution_clock::now();
-            double tiempoBusqueda = chrono::duration<double>(finBusqueda - busquedaAnterior).count();
-                        
-            busquedaAnterior = finBusqueda;
+            auto finBusquedaActual = chrono::high_resolution_clock::now();
+            double tiempoBusqueda = chrono::duration<double>(finBusquedaActual - InicioBusquedaActual).count();
+            
             promedioBusqueda += tiempoBusqueda;
-
 
             delete[] palabraBuscar;     
         }
+        auto finBusquedaTotal = chrono::high_resolution_clock::now();
         promedioBusqueda /= cantidad;
+        
+        double tiempoTotal = chrono::duration<double>(finBusquedaTotal - inicioBusqueda).count();
+
+
         cout << "--------------Tiempos--------------------------- " << endl;
         cout << "Tiempo promedio de busqueda: " << scientific << promedioBusqueda << " segundos." << endl;
         cout << "O en formato decimal: " << fixed << promedioBusqueda << " segundos." << endl;
         cout << "----------------------------------------- " << endl;
-        cout << "Tiempo total de busqueda: " << scientific << (finBusqueda - inicioBusqueda).count() << " segundos." << endl;
-        cout << "O en formato decimal: " << fixed << (finBusqueda - inicioBusqueda).count() << " segundos." << endl;
+        cout << "Tiempo total de busqueda: " << scientific << tiempoTotal << " segundos." << endl;
+        cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
 
     }
     
