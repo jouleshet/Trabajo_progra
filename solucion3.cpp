@@ -271,6 +271,7 @@ int main(int argc, char* argv[]) {
     cout << "Valor de k utilizado:    " << k << endl;
     cout << "----------------------------------------" << endl;
 
+    #pragma region experimento 2
     // --------------- Experimento 2: Busqueda de 10.000 claves de D2 ---------------
     if (experimento == 2) {
         const int NUM_BUSQUEDAS = 10000;
@@ -304,7 +305,8 @@ int main(int argc, char* argv[]) {
         cout << "Tiempo total busqueda:    " << tiempoBusqueda.count() << " segundos." << endl;
         cout << "Tiempo promedio/palabra:  " << tiempoBusqueda.count() / numBusquedas << " segundos." << endl;
     }
-
+    #pragma endregion experimento 2
+    #pragma region experimento 3
     // --------------- Experimento 3: Insercion y Eliminacion con D2 ---------------
     if (experimento == 3) {
         cout << "\nExperimento 3: Insercion y Eliminacion con D2..." << endl;
@@ -365,6 +367,7 @@ int main(int argc, char* argv[]) {
         cout << "Tiempo total eliminacion: " << tiempoElimTotal << " segundos." << endl;
         cout << "----------------------------------------" << endl;
     }
-
+    #pragma endregion experimento 3
+    
     return 0;
 }
