@@ -43,7 +43,7 @@ Experimento 0: como los tres de la seccion "Experimentacion por aplicar" utiliza
     3:
      Eliminacion de las 5.000 palabras restantes de D2, entregando el tiempo de ejecucion y la cantidad de eliminaciones exitosas
 
-    El experimento 1 borra la estructura despues de entregar los resultados (para evitar fugas de memoria) y vuelve a crear la estructura SOLO con las palabras de D1 para los experimentos 2 y 3, que trabajan con la misma, ya que al usar mitades diferentes de D2 desordenado no deberia de 
+
 
 Experimento 1: Crear la estructura con N palabras aleatorias de D1, entregando el tiempo total de ejecucion y el espacio usado en memoria
 

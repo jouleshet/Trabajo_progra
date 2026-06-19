@@ -173,11 +173,11 @@ Nodo* Creador_grilla(string archivoD1, int k, int limite, Nodo*& cabezaL1) {
 }
 #pragma endregion funciones y estructuras
 
-#pragma region experimentos
+#pragma region experimento0
 // ====================================================================
 // EXPERIMENTO 1: Búsqueda masiva en la Grilla
 // ====================================================================
-void ejecutarExperimento1(Nodo* grilla, vector<string> palabrasD2) {
+void ejecutarExperimento0Busqueda(Nodo* grilla, vector<string> palabrasD2) {
     
     cout << "\n--- Iniciando Experimento 1: Busqueda en la Grilla ---" << endl;
 
@@ -190,12 +190,14 @@ void ejecutarExperimento1(Nodo* grilla, vector<string> palabrasD2) {
     int encontradas = 0;
 
     auto inicio = chrono::high_resolution_clock::now();
+    
     for (int i = 0; i < num_busquedas; i++) {
         const unsigned char* palabraTest = (const unsigned char*)palabrasD2[i].c_str();
         if (buscarEnGrilla(grilla, palabraTest)) {
             encontradas++;
         }
     }
+
     auto fin = chrono::high_resolution_clock::now();
     double tiempo = chrono::duration<double>(fin - inicio).count();
 
@@ -210,12 +212,11 @@ void ejecutarExperimento1(Nodo* grilla, vector<string> palabrasD2) {
 // ====================================================================
 // EXPERIMENTO 2: Inserciones dinámicas en caliente
 // ====================================================================
-void ejecutarExperimento2(Nodo*& cabezaL1, vector<string> palabrasD2) {
+void ejecutarExperimento0Insercion(Nodo*& cabezaL1, vector<string> palabrasD2) {
     cout << "\n--- Iniciando Experimento 2: Inserciones dinamicas ---" << endl;
     
     int limiteIns = min(5000, (int)palabrasD2.size());
     vector<string> palabrasInsertar(palabrasD2.begin(), palabrasD2.begin() + limiteIns);
-    
     random_device rd;
     mt19937 g(rd());
     shuffle(palabrasInsertar.begin(), palabrasInsertar.end(), g);
@@ -238,7 +239,7 @@ void ejecutarExperimento2(Nodo*& cabezaL1, vector<string> palabrasD2) {
 // ====================================================================
 // EXPERIMENTO 3: Eliminaciones dinámicas con propagación vertical
 // ====================================================================
-void ejecutarExperimento3(Nodo*& cabezaL1, vector<string> palabrasD2) {
+void ejecutarExperimento0Eliminacion(Nodo*& cabezaL1, vector<string> palabrasD2) {
     cout << "\n--- Iniciando Experimento 3: Eliminaciones dinamicas ---" << endl;
     
     vector<string> palabrasEliminar;
@@ -288,7 +289,16 @@ void ejecutarExperimento3(Nodo*& cabezaL1, vector<string> palabrasD2) {
     cout << "Tiempo total de eliminacion: " << tiempo << " segundos." << endl;
 }
 
+#pragma endregion experimento0
+#pragma region experimentos
+Void EjecutarExperimento1(Nodo* grilla, int valor_n, int valor_k) {
+    cout << "\n--- Iniciando Experimento 1: Creacion de la Grilla ---" << endl;
+    auto inicio = chrono::high_resolution_clock::now();
+    Nodo* cabezaL1 = nullptr;
+}
 #pragma endregion experimentos
+
+
 
 // Main con medición de tiempo para el informe
     /*EJECUCION:
@@ -333,21 +343,28 @@ int main(int argc, char* argv[]) {
     Nodo* L1 = nullptr;    
     Nodo* grilla = nullptr;
     
-    grilla = Creador_grilla(archivoD1, k, n, L1);
+    
 
     cout << endl;
 
-    if (eleccion == 1){
-        ejecutarExperimento1(grilla, palabrasD2);
+    if (eleccion == 0){
+        grilla = Creador_grilla(archivoD1, k, 69903, L1);
+        ejecutarExperimento0Busqueda(grilla, palabrasD2);
+        ejecutarExperimento0Insercion(L1, palabrasD2);
+        ejecutarExperimento0Eliminacion(L1, palabrasD2);
+    }
+    else if (eleccion == 1){
+        grilla = Creador_grilla(archivoD1, k, n, L1);
+        EjecutarExperimento1(grilla, n, k);
     }
     else if (eleccion == 2){
-        ejecutarExperimento2(L1, palabrasD2);
+        EjecutarExperimento2(L1, n, k);
     }
     else if (eleccion == 3){
-        ejecutarExperimento3(L1, palabrasD2);
+        EjecutarExperimento3(L1, n, k);
     }
     else {
-        cout << "Error: Opcion de experimento invalida (Debe ser 1, 2 o 3)." << endl;
+        cout << "Error: Opcion de experimento invalida (Debe ser 0, 1, 2 o 3)." << endl;
     }
     
     cout << endl << "----------------- PROGRAMA FINALIZADO -----------------" << endl<< endl;
