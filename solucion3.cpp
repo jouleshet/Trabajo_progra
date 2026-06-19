@@ -1,5 +1,3 @@
-//EJECUCION: ./solucion3 <archivo_D1> <valor_k>
-//Ejemplo: ./solucion3 D1.txt 8
 
 #include <iostream>
 #include <string>
@@ -14,7 +12,6 @@
 
 using namespace std;
 
-const int REP = 10000; // numero de busquedas en el experimento 2
 
 #pragma region funciones y estructuras
 // Nodo del arbol k-ario
@@ -122,7 +119,7 @@ NodoK* insertar(NodoK* raiz, unsigned char* palabra, int k) {
             }
             actual->claves[i] = palabra;
             // El nuevo hueco de hijo (i+1) hereda el subarbol que estaba en hijos[i]
-            actual->hijos[i + 1] = actual->hijos[i];
+            actual->hijos[i + 1] = actual->hijos[i]; //esta linea parace que mata el codigo, y no se que hace
             actual->numClaves++;
             return raiz;
         }
@@ -252,20 +249,30 @@ long long calcularMemoria(NodoK* raiz) {
 segundo argumento el valor de k con el que quiere ejecutar (8,32,128,512)*/
 
 int main(int argc, char* argv[]) {
-    if (argc < 3) {
-        cout << "Uso: ./solucion3 <archivo_D1> <valor_k>" << endl;
+    if (argc < 4) {
+        cout << "Uso: ./solucion3 <experimento> <valor_n> <valor_k>" << endl;
         return 1;
     }
 
-    string archivoD1 = argv[1];
-    int k = stoi(argv[2]);
+    int experimento = atoi(argv[1]);
+    int valor_n = atoi(argv[2]);  
+    int k = atoi(argv[3]);
+    int cantidadAInsertar = 69903; // cantidad total de palabras en D1.txt
+    if (experimento==1){
+        cantidadAInsertar = valor_n;
+    }
+    
+
+
+    string archivoD1 = "D1.txt";
+    
 
     if (k <= 0) {
         cout << "Error: k debe ser un entero positivo (potencia de 2)." << endl;
         return 1;
     }
 
-    // EXPERIMENTO 1: Construccion
+
     cout << "Cargando D1 y construyendo el arbol " << (k + 1) << "-ario (k=" << k << ")..." << endl;
 
     ifstream fileD1(archivoD1);
@@ -274,6 +281,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    cout << "D1 cargando..." << endl;
+
     vector<string> palabrasD1;
     string linea;
     while (getline(fileD1, linea)) {
@@ -281,26 +290,52 @@ int main(int argc, char* argv[]) {
     }
     fileD1.close();
 
+    cout << "D1 cargado" << endl;
+
+    if (cantidadAInsertar > (int)palabrasD1.size()) {
+
+        cout << "Error: cantidad solicitada excede D1." << endl;
+
+        return 1;
+    }
+
     NodoK* raiz = nullptr;
 
     auto inicioConst = chrono::high_resolution_clock::now();
-    for (const string& p : palabrasD1) {
-        unsigned char* palabraNueva = copiarPalabra((const unsigned char*)p.c_str());
+
+    cout << "Comenzando inserciones" << endl;
+
+    for (int i = 0; i < cantidadAInsertar; i++)
+    {
+        const string& p = palabrasD1[i];
+
+        unsigned char* palabraNueva =
+            copiarPalabra((const unsigned char*)p.c_str());
+
         raiz = insertar(raiz, palabraNueva, k);
     }
+
     auto finConst = chrono::high_resolution_clock::now();
+
+    cout << "Inserciones completadas" << endl;
+
     chrono::duration<double> tiempoConst = finConst - inicioConst;
 
-    long long memoria = calcularMemoria(raiz);
+    cout << "Antes memoria" << endl;
+    //long long memoria = calcularMemoria(raiz); ESTA LINEA MATA TODO, SEGUN GPT ES PQ EL ARBOL LLAMA LOS MISMOS NODOS VARIAS VECES AAAAH
+    cout << "Despues memoria" << endl;
 
     cout << "Estructura creada en: " << tiempoConst.count() << " segundos." << endl;
-    cout << "Memoria total utilizada: " << memoria << " bytes ("
-         << (memoria / (1024.0 * 1024.0)) << " MB)." << endl;
+    // cout << "Memoria total utilizada: " << memoria << " bytes (" << (memoria / (1024.0 * 1024.0)) << " MB)." << endl;
     cout << "Valor de k utilizado: " << k << endl;
 
+#pragma region experimento 2
     // EXPERIMENTO 2: Busqueda de REP claves existentes
-    cout << "\nIniciando Experimento 2: Busqueda de " << REP << " claves de D1..." << endl;
+    if (experimento == 2) {
+    int REP = valor_n; // numero de busquedas a realizar
 
+    cout << "\nIniciando Experimento 2: Busqueda de " << REP << " claves de D1..." << endl;
+    
     vector<string> copiaD1 = palabrasD1;
     random_device rd;
     mt19937 g(rd());
@@ -323,8 +358,12 @@ int main(int argc, char* argv[]) {
     cout << "Palabras encontradas: " << encontradas << endl;
     cout << "Tiempo total de busqueda: " << tiempoBusqueda.count() << " segundos." << endl;
     cout << "Tiempo promedio por palabra: " << tiempoPromedio << " segundos." << endl;
+    }
+#pragma endregion experimento 2
 
+#pragma region experimento 3
     // EXPERIMENTO 3: Insercion/Eliminacion intercalada con D2 
+    if (experimento == 3) {
     cout << "\nIniciando Experimento 3: Insercion/Eliminacion intercalada con D2..." << endl;
 
     ifstream fileD2("D2.txt");
@@ -356,17 +395,20 @@ int main(int argc, char* argv[]) {
             else elimFallidas++;
         }
     }
-
+    cout << "---------------Resultados-------------"<< endl;
     cout << "Total palabras de D2 procesadas: " << palabrasD2.size() << endl;
     cout << "Inserciones realizadas: " << insExitosas << endl;
     cout << "Tiempo total de insercion: " << tiempoInsTotal << " segundos." << endl;
     cout << "Eliminaciones exitosas: " << elimExitosas << endl;
     cout << "Eliminaciones no exitosas: " << elimFallidas << endl;
     cout << "Tiempo total de eliminacion: " << tiempoElimTotal << " segundos." << endl;
-
-    long long memoriaFinal = calcularMemoria(raiz);
-    cout << "\nMemoria final utilizada: " << memoriaFinal << " bytes ("
-         << (memoriaFinal / (1024.0 * 1024.0)) << " MB)." << endl;
-
-    return 0;
+    cout << "---------------Fin Experimento 3-------------"<< endl;
 }
+ #pragma endregion experimento 3
+
+    //long long memoriaFinal = calcularMemoria(raiz);
+    //cout << "\nMemoria final utilizada: " << memoriaFinal << " bytes ("<< (memoriaFinal / (1024.0 * 1024.0)) << " MB)." << endl;
+    // MEMORIA MATA SOLUCION 3 ASI QUE AHORA ESTA COMENTADO DESPPUES DE QUE FUNCIONE
+    return 0;
+}  
+ 

@@ -1,4 +1,4 @@
-# Este es el makefile
+# Este es el makefile usar make o mingw32-make
 CXX = g++
 CXXFLAGS = -Wall -O3 -std=c++11
 
