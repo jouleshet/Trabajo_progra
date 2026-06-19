@@ -359,21 +359,6 @@ int main(int argc, char* argv[]) {
             if (ok) elimExitosas++;
             else    elimFallidas++;
         }
-<<<<<<< HEAD
-=======
-    }
-    cout << "---------------Resultados-------------------"<< endl;
-    cout << "Total palabras de D2 procesadas: " << palabrasD2.size() << endl;
-    cout << "Inserciones realizadas: " << insExitosas << endl;
-    cout << "Tiempo total de insercion: " << tiempoInsTotal << " segundos." << endl;
-    cout << "---------------Eliminaciones----------------"<< endl;
-    cout << "Eliminaciones exitosas: " << elimExitosas << endl;
-    cout << "Eliminaciones no exitosas: " << elimFallidas << endl;
-    cout << "Tiempo total de eliminacion: " << tiempoElimTotal << " segundos." << endl;
-    cout << "---------------Fin Experimento 3-------------"<< endl;
-}
- #pragma endregion experimento 3
->>>>>>> be96176 (mis cambios)
 
         cout << "Eliminaciones exitosas:   " << elimExitosas    << endl;
         cout << "Eliminaciones fallidas:   " << elimFallidas    << " (palabra no existia en la estructura)" << endl;
