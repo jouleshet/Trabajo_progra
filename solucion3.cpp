@@ -14,7 +14,6 @@
 
 using namespace std;
 
-const int REP = 10000; // numero de busquedas en el experimento 2
 
 #pragma region funciones y estructuras
 // Nodo del arbol k-ario
@@ -252,20 +251,29 @@ long long calcularMemoria(NodoK* raiz) {
 segundo argumento el valor de k con el que quiere ejecutar (8,32,128,512)*/
 
 int main(int argc, char* argv[]) {
-    if (argc < 3) {
-        cout << "Uso: ./solucion3 <archivo_D1> <valor_k>" << endl;
+    if (argc < 4) {
+        cout << "Uso: ./solucion3 <experimento> <valor_n> <valor_k>" << endl;
         return 1;
     }
 
+    int experimento = atoi(argv[1]);
+    int valor_n = atoi(argv[2]);  
+    int k = atoi(argv[3]);
+    int cantidadAInsertar = 69903; // cantidad total de palabras en D1.txt
+    if (experimento==1){
+        cantidadAInsertar = valor_n;
+    }
+
+
     string archivoD1 = argv[1];
-    int k = stoi(argv[2]);
+
 
     if (k <= 0) {
         cout << "Error: k debe ser un entero positivo (potencia de 2)." << endl;
         return 1;
     }
 
-    // EXPERIMENTO 1: Construccion
+
     cout << "Cargando D1 y construyendo el arbol " << (k + 1) << "-ario (k=" << k << ")..." << endl;
 
     ifstream fileD1(archivoD1);
@@ -284,23 +292,34 @@ int main(int argc, char* argv[]) {
     NodoK* raiz = nullptr;
 
     auto inicioConst = chrono::high_resolution_clock::now();
-    for (const string& p : palabrasD1) {
-        unsigned char* palabraNueva = copiarPalabra((const unsigned char*)p.c_str());
+
+    for (int i = 0; i < cantidadAInsertar; i++)
+    {
+        const string& p = palabrasD1[i];
+
+        unsigned char* palabraNueva =
+            copiarPalabra((const unsigned char*)p.c_str());
+
         raiz = insertar(raiz, palabraNueva, k);
     }
+
     auto finConst = chrono::high_resolution_clock::now();
+    
     chrono::duration<double> tiempoConst = finConst - inicioConst;
 
     long long memoria = calcularMemoria(raiz);
 
     cout << "Estructura creada en: " << tiempoConst.count() << " segundos." << endl;
-    cout << "Memoria total utilizada: " << memoria << " bytes ("
-         << (memoria / (1024.0 * 1024.0)) << " MB)." << endl;
+    cout << "Memoria total utilizada: " << memoria << " bytes (" << (memoria / (1024.0 * 1024.0)) << " MB)." << endl;
     cout << "Valor de k utilizado: " << k << endl;
 
+#pragma region experimento 2
     // EXPERIMENTO 2: Busqueda de REP claves existentes
-    cout << "\nIniciando Experimento 2: Busqueda de " << REP << " claves de D1..." << endl;
+    if (experimento == 2) {
+    int REP = valor_n; // numero de busquedas a realizar
 
+    cout << "\nIniciando Experimento 2: Busqueda de " << REP << " claves de D1..." << endl;
+    
     vector<string> copiaD1 = palabrasD1;
     random_device rd;
     mt19937 g(rd());
@@ -323,7 +342,10 @@ int main(int argc, char* argv[]) {
     cout << "Palabras encontradas: " << encontradas << endl;
     cout << "Tiempo total de busqueda: " << tiempoBusqueda.count() << " segundos." << endl;
     cout << "Tiempo promedio por palabra: " << tiempoPromedio << " segundos." << endl;
+    }
+#pragma endregion experimento 2
 
+#pragma region experimento 3
     // EXPERIMENTO 3: Insercion/Eliminacion intercalada con D2 
     cout << "\nIniciando Experimento 3: Insercion/Eliminacion intercalada con D2..." << endl;
 
@@ -363,10 +385,11 @@ int main(int argc, char* argv[]) {
     cout << "Eliminaciones exitosas: " << elimExitosas << endl;
     cout << "Eliminaciones no exitosas: " << elimFallidas << endl;
     cout << "Tiempo total de eliminacion: " << tiempoElimTotal << " segundos." << endl;
+ #pragma endregion experimento 3
 
     long long memoriaFinal = calcularMemoria(raiz);
     cout << "\nMemoria final utilizada: " << memoriaFinal << " bytes ("
          << (memoriaFinal / (1024.0 * 1024.0)) << " MB)." << endl;
 
     return 0;
-}
+}   
