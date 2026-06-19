@@ -14,6 +14,7 @@ INSTRUCCIONES DE EJECUCION:
 1. Solucion 1 (Arreglo Dinamico)
 
 Forma de ejecucion: ./solucion1.exe <Numero_experimento> <valor_N>
+Ejecucion predeterminado(con valores predeterminados): ./solucion1.exe 0 0 0 0 
 
 
 
