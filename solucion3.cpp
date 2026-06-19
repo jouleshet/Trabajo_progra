@@ -234,12 +234,15 @@ int main(int argc, char* argv[]) {
     // Cargar D1.txt limpiando \r de cada linea (formato Windows)
     ifstream fileD1("D1.txt");
     if (!fileD1.is_open()) { cout << "Error: no se pudo abrir D1.txt" << endl; return 1; }
+
     vector<string> palabrasD1;
     string linea;
+
     while (getline(fileD1, linea)) {
         limpiarCR(linea);
         if (!linea.empty()) palabrasD1.push_back(linea);
     }
+
     fileD1.close();
 
     int cantidadAInsertar = (experimento == 1) ? valor_n : (int)palabrasD1.size();
@@ -250,8 +253,7 @@ int main(int argc, char* argv[]) {
     }
 
     // --------------- Construccion ---------------
-    cout << "Construyendo arbol " << (k + 1) << "-ario (k=" << k
-         << ") con " << cantidadAInsertar << " palabras..." << endl;
+    cout << "Construyendo arbol " << (k + 1) << "-ario (k=" << k << ") con " << cantidadAInsertar << " palabras..." << endl;
 
     NodoK* raiz = nullptr;
     auto inicioConst = chrono::high_resolution_clock::now();
@@ -274,8 +276,8 @@ int main(int argc, char* argv[]) {
     #pragma region experimento 2
     // --------------- Experimento 2: Busqueda de 10.000 claves de D2 ---------------
     if (experimento == 2) {
-        const int NUM_BUSQUEDAS = 10000;
-        cout << "\nExperimento 2: Busqueda de " << NUM_BUSQUEDAS
+        num_Busquedas = valor_n;
+        cout << "\nExperimento 2: Busqueda de " << num_Busquedas;
              << " claves de D2 en estructura construida con D1..." << endl;
 
         ifstream fileD2("D2.txt");
@@ -291,7 +293,7 @@ int main(int argc, char* argv[]) {
         mt19937 g(rd());
         shuffle(palabrasD2.begin(), palabrasD2.end(), g);
 
-        int numBusquedas = min(NUM_BUSQUEDAS, (int)palabrasD2.size());
+        int numBusquedas = min(num_Busquedas, (int)palabrasD2.size());
         int encontradas  = 0;
 
         auto inicioBusqueda = chrono::high_resolution_clock::now();
@@ -368,6 +370,6 @@ int main(int argc, char* argv[]) {
         cout << "----------------------------------------" << endl;
     }
     #pragma endregion experimento 3
-    
+
     return 0;
 }
