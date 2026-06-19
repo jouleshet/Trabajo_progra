@@ -1,3 +1,10 @@
+#if defined(_WIN32) || defined(_WIN64)
+    #include <windows.h>
+    #include <psapi.h> // Librería para medir ram en windows
+#else
+    #include <sys/resource.h> //Version de linux
+#endif
+
 #include <string>
 #include <iostream>
 #include <cstdlib>
@@ -8,6 +15,7 @@
 #include "compara_ascii.cpp"
 #include <algorithm>
 #include <random>
+
 
 using namespace std;
 
@@ -291,12 +299,168 @@ void ejecutarExperimento0Eliminacion(Nodo*& cabezaL1, vector<string> palabrasD2)
 
 #pragma endregion experimento0
 #pragma region experimentos
-Void EjecutarExperimento1(Nodo* grilla, int valor_n, int valor_k) {
+
+//Funcion para medir memoria usada
+long getMemoryUsageKB() {
+#if defined(_WIN32) || defined(_WIN64)
+    // Código específico para medir la RAM física consumida en Windows
+    PROCESS_MEMORY_COUNTERS pmc;
+    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+        return pmc.WorkingSetSize / 1024; // Convertimos de Bytes a Kilobytes
+    }
+    return 0;
+#else
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    return usage.ru_maxrss; 
+#endif
+}
+
+void EjecutarExperimento1(string archivoD1,int valor_n, int valor_k,Nodo*& cabezaL1, Nodo*& cabezaGrilla) {
     cout << "\n--- Iniciando Experimento 1: Creacion de la Grilla ---" << endl;
     auto inicio = chrono::high_resolution_clock::now();
-    Nodo* cabezaL1 = nullptr;
+    long memoria_inicio=getMemoryUsageKB();
+
+    cabezaL1 = Crea_Clave(archivoD1, valor_n);
+    cabezaGrilla = crearNiveles(cabezaL1, valor_k);
+
+    long memoria_final=getMemoryUsageKB();
+
+    long valormemoria=memoria_final-memoria_inicio;
+    auto fin = chrono::high_resolution_clock::now();
+    chrono::duration<double> tiempo = fin - inicio;
+
+    cout << "Estructura creada en: " << tiempo.count() << " segundos." << endl;
+    cout << "Valor de k utilizado: " << valor_k << endl;
+    cout << "Mmeoria Ram usada:"<< valormemoria << "KB"<< endl;
+    cout << "------------------------------------------------------" << endl;
+}
+
+void EjecutarExperimento2(Nodo* grilla, string archivoD1, int valor_n, int rep) {
+
+    cout << "\n--- Iniciando Experimento 2: Busqueda de Claves Existentes ---" << endl;
+
+    ifstream fileD1(archivoD1);
+    vector<string> todasLasPalabras;
+    string linea;
+    int contador = 0;
+
+    if (!fileD1.is_open()) {
+        cout << "Error: No se pudo leer " << archivoD1 << " para extraer claves de prueba." << endl;
+        return;
+    }
+
+    while (getline(fileD1, linea)) {
+        if (linea.empty()) continue;
+        if (contador >= valor_n) break;
+        todasLasPalabras.push_back(linea);
+        contador++;
+    }
+    fileD1.close();
+
+    if (todasLasPalabras.empty()) {
+        cout << "Error: No hay palabras cargadas para buscar." << endl;
+        return;
+    }
+
+    int num_busquedas = min(rep, (int)todasLasPalabras.size());
+
+    random_device rd;
+    mt19937 g(rd());
+    shuffle(todasLasPalabras.begin(), todasLasPalabras.end(), g);
+
+    vector<string> clavesA_Buscar(todasLasPalabras.begin(), todasLasPalabras.begin() + num_busquedas);
+
+    int encontradas = 0;
+
+    auto inicio = chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < num_busquedas; i++) {
+        const unsigned char* palabraTest = (const unsigned char*)clavesA_Buscar[i].c_str();
+        if (buscarEnGrilla(grilla, palabraTest)) {
+            encontradas++;
+        }
+    }
+
+    auto fin = chrono::high_resolution_clock::now();
+    chrono::duration<double> tiempoTotal = fin - inicio;
+
+    double tiempoPromedio = tiempoTotal.count() / num_busquedas;
+
+    cout << "Claves programadas (REP):      " << rep << endl;
+    cout << "Claves buscadas con exito:     " << num_busquedas << endl;
+    cout << "Claves encontradas en grilla:  " << encontradas << " (Debe ser igual a las buscadas)" << endl;
+    cout << "Tiempo total de CPU de busqueda: " << tiempoTotal.count() << " segundos." << endl;
+    cout << "Tiempo promedio por palabra:   " << scientific << tiempoPromedio << " segundos." << endl;
+    cout << "------------------------------------------------------" << endl;
+
+}
+
+void EjecutarExperimento3(Nodo*& cabezaL1, string archivoD2) {
+    cout << "\n--- Iniciando Experimento 3: Operaciones Intercaladas (D2) ---" << endl;
+
+    ifstream fileD2(archivoD2);
+    string linea;
+    
+    if (!fileD2.is_open()) {
+        cout << "Error: No se pudo abrir el archivo " << archivoD2 << " para las operaciones intercaladas." << endl;
+        return;
+    }
+
+    int total_lineas = 0;
+    int insExitosas = 0;
+    int elimExitosas = 0;
+
+    auto inicio = chrono::high_resolution_clock::now();
+
+    while (getline(fileD2, linea)) {
+        if (linea.empty()) continue;
+        total_lineas++;
+
+        const unsigned char* palabraD2 = (const unsigned char*)linea.c_str();
+
+        if (total_lineas % 2 != 0) {
+            cabezaL1 = insertarOrdenado(cabezaL1, palabraD2);
+            insExitosas++;
+        } 
+        else {
+            Nodo* actual = cabezaL1;
+            while (actual) {
+                if (compararLexicografico(actual->clave, palabraD2) == 0) {
+                    if (actual->ant) {
+                        actual->ant->sig = actual->sig;
+                    } else {
+                        cabezaL1 = actual->sig; 
+                    }
+                    
+                    if (actual->sig) {
+                        actual->sig->ant = actual->ant;
+                    }
+                    
+                    delete[] actual->clave;
+                    delete actual;
+                    
+                    elimExitosas++;
+                    break; 
+                }
+                actual = actual->sig;
+            }
+        }
+    }
+    fileD2.close();
+
+    auto fin = chrono::high_resolution_clock::now();
+    chrono::duration<double> tiempoTotal = fin - inicio;
+
+    cout << "Total de lineas procesadas desde D2: " << total_lineas << endl;
+    cout << "Operaciones de Insercion llamadas:   " << insExitosas << endl;
+    cout << "Operaciones de Eliminacion exitosas: " << elimExitosas << " (De un total de " << (total_lineas / 2) << ")" << endl;
+    cout << "Tiempo total de ejecucion (Exp 3):   " << tiempoTotal.count() << " segundos." << endl;
+    cout << "------------------------------------------------------" << endl;
 }
 #pragma endregion experimentos
+
+
 
 
 
@@ -354,19 +518,24 @@ int main(int argc, char* argv[]) {
         ejecutarExperimento0Eliminacion(L1, palabrasD2);
     }
     else if (eleccion == 1){
-        grilla = Creador_grilla(archivoD1, k, n, L1);
-        EjecutarExperimento1(grilla, n, k);
+        EjecutarExperimento1(archivoD1,n,k,L1,grilla);
     }
+
     else if (eleccion == 2){
-        EjecutarExperimento2(L1, n, k);
+        cout << "Ingrese REP que desea usar:";
+        int rep;
+        cin >> rep;
+        grilla = Creador_grilla(archivoD1, k, n, L1);
+        EjecutarExperimento2(grilla, archivoD1, n, rep);
     }
     else if (eleccion == 3){
-        EjecutarExperimento3(L1, n, k);
+        grilla = Creador_grilla(archivoD1, k, n, L1);
+        EjecutarExperimento3(L1, archivoD2);
     }
     else {
         cout << "Error: Opcion de experimento invalida (Debe ser 0, 1, 2 o 3)." << endl;
     }
-    
+
     cout << endl << "----------------- PROGRAMA FINALIZADO -----------------" << endl<< endl;
     // Limpieza de basura
     destruirGrilla(grilla);
