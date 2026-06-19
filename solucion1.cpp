@@ -275,6 +275,12 @@ int main(int argc, char* argv[]) {
     }
     else if (experimento == 1) {
         cout << "Experimento 1: Creacion de la estructura (Arreglo)" << endl;
+        random_device rd;
+        mt19937 gen(rd());
+
+        shuffle(todasLasPalabrasD1.begin(), todasLasPalabrasD1.end(), gen);
+
+        
         auto inicioConst = chrono::high_resolution_clock::now();
         
         for (int i = 0; i < cantidadAInsertar; i++) {
@@ -315,9 +321,18 @@ int main(int argc, char* argv[]) {
             promedioBusqueda += chrono::duration<double>(b_fin - b_ini).count();
         }
         auto finBusquedaTotal = chrono::high_resolution_clock::now();
+        promedioBusqueda /= cantidad;
         
-        cout << "Tiempo promedio por palabra: " << scientific << (promedioBusqueda / n_busquedas) << " segundos." << endl;
-        cout << "Tiempo total de busqueda:    " << chrono::duration<double>(finBusquedaTotal - inicioBusqueda).count() << " segundos." << endl;
+        double tiempoTotal = chrono::duration<double>(finBusquedaTotal - inicioBusqueda).count();
+        double promedioMicrosegundos = promedioBusqueda * 1e6;
+
+
+        cout << "--------------Tiempos--------------------------- " << endl  << endl;
+        cout << "Tiempo promedio de busqueda: " << scientific << promedioBusqueda << " segundos." << endl;
+        cout << "O en formato decimal: " << fixed << promedioMicrosegundos << " microsegundos." << endl;
+        cout << "----------------------------------------- " << endl;
+        cout << "Tiempo total de busqueda: " << scientific << tiempoTotal << " segundos." << endl;
+        cout << "O en formato decimal: " << fixed << tiempoTotal << " segundos." << endl;
     }
     else if (experimento == 3) {
         cout << "Experimento 3: Insercion y eliminacion intercalada desde D2" << endl;

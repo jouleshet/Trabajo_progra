@@ -22,7 +22,7 @@ Ejecucion predeterminado(con valores predeterminados): ./solucion1.exe 0 0 0 0
 
 El ejecutable requiere que se le pase el archivo base de carga y el parámetro k (tamaño de salto para los atajos). La pauta sugiere probar con k = 8, 32, 128 o 512.
 
-Forma de ejecucion: ./solucion2 <archivo_D1> <Valor_N> <valor_K> <Numero_experimento>
+Forma de ejecucion: forma de ejecucion ./solucion2 <experimento> <limite_n> <valor_k>
 
 3. Solucion 3 (Arbol K-ario)
 
@@ -32,7 +32,7 @@ Forma de ejecucion: ./solucion3 <experimento> <valor_n> <valor_k>
 
 
 Experimentos:
-
+hola
 Experimento 0: como los tres de la seccion "Experimentacion por aplicar" utilizan parametros ya preestablecidos se juntaron en este Experimento. En particular, son tres experimentos:
     
     1:

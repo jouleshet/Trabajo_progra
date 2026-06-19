@@ -332,8 +332,8 @@ void EjecutarExperimento1(string archivoD1,int valor_n, int valor_k,Nodo*& cabez
 
     cout << "Estructura creada en: " << tiempo.count() << " segundos." << endl;
     cout << "Valor de k utilizado: " << valor_k << endl;
-    cout << "Mmeoria Ram usada:"<< valormemoria << "KB"<< endl;
-    cout << "------------------------------------------------------" << endl;
+    cout << "Mmeoria Ram usada:"<< valormemoria/1024.0 << "mb"<< endl;
+    cout << "------------------------------------------------------" << endl << endl;
 }
 
 void EjecutarExperimento2(Nodo* grilla, string archivoD1, int valor_n, int rep) {
@@ -390,8 +390,8 @@ void EjecutarExperimento2(Nodo* grilla, string archivoD1, int valor_n, int rep) 
     cout << "Claves programadas (REP):      " << rep << endl;
     cout << "Claves buscadas con exito:     " << num_busquedas << endl;
     cout << "Claves encontradas en grilla:  " << encontradas << " (Debe ser igual a las buscadas)" << endl;
-    cout << "Tiempo total de CPU de busqueda: " << tiempoTotal.count() << " segundos." << endl;
-    cout << "Tiempo promedio por palabra:   " << scientific << tiempoPromedio << " segundos." << endl;
+    cout << "Tiempo total de CPU de busqueda: " << tiempoTotal.count()*1000 << " milisegundos." << endl;
+    cout << "Tiempo promedio por palabra:   " << fixed << tiempoPromedio* 1e6 << " microsegundos." << endl;
     cout << "------------------------------------------------------" << endl;
 
 }
@@ -476,18 +476,18 @@ void EjecutarExperimento3(Nodo*& cabezaL1, string archivoD2) {
     3.-Eliminacion aleatoria de palabras en la grilla*/
 
 int main(int argc, char* argv[]) {
-    if (argc < 5) {
+    if (argc < 4) {
         cout << "Error: Faltan argumentos de ejecucion." << endl;
-        cout << "Uso: ./solucion2 <archivo_D1> <limite_n> <valor_k> <experimento_1_2_3>" << endl;
+        cout << "Uso: ./solucion2 <experimento> <limite_n> <valor_k>" << endl;
         return 1;
     }
 
     cout << endl << "----------------- INICIANDO PROGRAMA -----------------" << endl;
 
-    string archivoD1 = argv[1];
+    string archivoD1 = "D1.txt";
     int n = stoi(argv[2]);
     int k = stoi(argv[3]);
-    int eleccion = stoi(argv[4]);
+    int eleccion = stoi(argv[1]);
     string archivoD2 = "D2.txt";
 
     ifstream fileD2(archivoD2);
@@ -522,9 +522,7 @@ int main(int argc, char* argv[]) {
     }
 
     else if (eleccion == 2){
-        cout << "Ingrese REP que desea usar:";
-        int rep;
-        cin >> rep;
+        int rep = n;
         grilla = Creador_grilla(archivoD1, k, n, L1);
         EjecutarExperimento2(grilla, archivoD1, n, rep);
     }
