@@ -25,7 +25,7 @@ Forma de ejecucion: ./solucion2 <archivo_D1> <Valor_N> <valor_K> <Numero_experim
 
 3. Solucion 3 (Arbol K-ario)
 
-Forma de ejecucion: ./solucion3 <archivo_D1> <valor_K>
+Forma de ejecucion: ./solucion3 <experimento> <valor_n> <valor_k>
 
 
 
