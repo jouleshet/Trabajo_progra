@@ -271,14 +271,13 @@ int main(int argc, char* argv[]) {
     cout << "Memoria total utilizada: " << memoria << " bytes ("
          << (memoria / (1024.0 * 1024.0)) << " MB)." << endl;
     cout << "Valor de k utilizado:    " << k << endl;
-    cout << "----------------------------------------" << endl;
+    cout << "----------------------------------------" << endl << endl;
 
     #pragma region experimento 2
     // --------------- Experimento 2: Busqueda de 10.000 claves de D2 ---------------
     if (experimento == 2) {
-        num_Busquedas = valor_n;
-        cout << "\nExperimento 2: Busqueda de " << num_Busquedas;
-             << " claves de D2 en estructura construida con D1..." << endl;
+        int num_Busquedas = valor_n;
+        cout << "------------Experimento 2: Busqueda de " << num_Busquedas << " claves--------" << endl;
 
         ifstream fileD2("D2.txt");
         if (!fileD2.is_open()) { cout << "Error: no se pudo abrir D2.txt" << endl; return 1; }
@@ -301,7 +300,7 @@ int main(int argc, char* argv[]) {
             if (buscar(raiz, (const unsigned char*)palabrasD2[i].c_str())) encontradas++;
         auto finBusqueda = chrono::high_resolution_clock::now();
         chrono::duration<double> tiempoBusqueda = finBusqueda - inicioBusqueda;
-
+        cout << "-------------------Resultados--------------" << endl;
         cout << "Total busquedas:          " << numBusquedas << endl;
         cout << "Palabras encontradas:     " << encontradas  << endl;
         cout << "Tiempo total busqueda:    " << tiempoBusqueda.count() << " segundos." << endl;
