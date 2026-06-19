@@ -221,7 +221,7 @@ int main(int argc, char* argv[]) {
         cout << "  experimento 3: construccion D1 + insercion primeras 5000 de D2 + eliminacion ultimas 5000 de D2" << endl;
         return 1;
     }
-
+    cout << endl << endl << "----------------------------------------" << endl;
     int experimento = atoi(argv[1]);
     int valor_n     = atoi(argv[2]);
     int k           = atoi(argv[3]);
@@ -230,7 +230,7 @@ int main(int argc, char* argv[]) {
         cout << "Error: k debe ser un entero positivo (potencia de 2)." << endl;
         return 1;
     }
-
+    #pragma region creacion estructura y experimento 1
     // Cargar D1.txt limpiando \r de cada linea (formato Windows)
     ifstream fileD1("D1.txt");
     if (!fileD1.is_open()) { cout << "Error: no se pudo abrir D1.txt" << endl; return 1; }
@@ -272,39 +272,32 @@ int main(int argc, char* argv[]) {
          << (memoria / (1024.0 * 1024.0)) << " MB)." << endl;
     cout << "Valor de k utilizado:    " << k << endl;
     cout << "----------------------------------------" << endl << endl;
-
+    #pragma endregion creacion estructura y experimento 1
     #pragma region experimento 2
     // --------------- Experimento 2: Busqueda de 10.000 claves de D2 ---------------
     if (experimento == 2) {
         int num_Busquedas = valor_n;
         cout << "------------Experimento 2: Busqueda de " << num_Busquedas << " claves--------" << endl;
 
-        ifstream fileD2("D2.txt");
-        if (!fileD2.is_open()) { cout << "Error: no se pudo abrir D2.txt" << endl; return 1; }
-        vector<string> palabrasD2;
-        while (getline(fileD2, linea)) {
-            limpiarCR(linea);
-            if (!linea.empty()) palabrasD2.push_back(linea);
-        }
-        fileD2.close();
+        vector<string> palabrascopia = palabrasD1;
 
         random_device rd;
         mt19937 g(rd());
-        shuffle(palabrasD2.begin(), palabrasD2.end(), g);
+        shuffle(palabrascopia.begin(), palabrascopia.end(), g);
 
-        int numBusquedas = min(num_Busquedas, (int)palabrasD2.size());
+        int numBusquedas = min(num_Busquedas, (int)palabrascopia.size());
         int encontradas  = 0;
 
         auto inicioBusqueda = chrono::high_resolution_clock::now();
         for (int i = 0; i < numBusquedas; i++)
-            if (buscar(raiz, (const unsigned char*)palabrasD2[i].c_str())) encontradas++;
+            if (buscar(raiz, (const unsigned char*)palabrascopia[i].c_str())) encontradas++;
         auto finBusqueda = chrono::high_resolution_clock::now();
         chrono::duration<double> tiempoBusqueda = finBusqueda - inicioBusqueda;
         cout << "-------------------Resultados--------------" << endl;
         cout << "Total busquedas:          " << numBusquedas << endl;
         cout << "Palabras encontradas:     " << encontradas  << endl;
-        cout << "Tiempo total busqueda:    " << tiempoBusqueda.count() << " segundos." << endl;
-        cout << "Tiempo promedio/palabra:  " << tiempoBusqueda.count() / numBusquedas << " segundos." << endl;
+        cout << "Tiempo total busqueda:    " << tiempoBusqueda.count() * 1e3 << " milisegundos." << endl;
+        cout << "Tiempo promedio/palabra:  " << tiempoBusqueda.count() * 1e6 / numBusquedas << " microsegundos." << endl;
     }
     #pragma endregion experimento 2
     #pragma region experimento 3
